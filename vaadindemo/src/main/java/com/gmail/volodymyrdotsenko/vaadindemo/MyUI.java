@@ -25,7 +25,7 @@ import com.vaadin.ui.UI;
  */
 @SpringUI
 @Theme("mytheme")
-@Widgetset("com.gmail.volodymyrdotsenko.vaadindemo.MyAppWidgetset")
+//@Widgetset("com.gmail.volodymyrdotsenko.vaadindemo.MyAppWidgetset")
 public class MyUI extends UI {
 
 	private static final long serialVersionUID = 1L;

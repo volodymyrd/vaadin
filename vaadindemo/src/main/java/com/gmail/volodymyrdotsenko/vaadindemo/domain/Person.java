@@ -12,6 +12,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
+
 @Entity
 public class Person implements Serializable {
 
@@ -21,19 +24,22 @@ public class Person implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date birthDay;
 
 	private Boolean colleague;
 
-	@NotNull(message = "Name is required")
-	@Size(min = 3, max = 50, message = "name must be longer than 3 and less than 40 characters")
-	private String name;
+	//@NotNull
+	@NotBlank
+	@Size(min = 3, max = 50)
+	private String name = "";
 
 	private String phoneNumber;
 
-	@NotNull(message = "Email is required")
-	@Pattern(regexp = ".+@.+\\.[a-z]+", message = "Must be valid email")
+	//@NotNull(message = "Email is required")
+	@NotEmpty
+	@Pattern(regexp = ".+@.+\\.[a-z]+", message = "{notvalidemail}")
 	private String email;
 
 	public Person() {
