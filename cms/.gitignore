@@ -1,8 +1,4 @@
-/bin/*
-/.gradle/*
-/build/*
-/.settings/*
-.classpath
-.project
-/target/*
-/target/
+*/.settings/*
+*/.classpath
+*/.project
+*/target/*

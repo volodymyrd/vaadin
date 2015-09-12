@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+<!--     <logger name="com.vaadin.spring" level="DEBUG"/> -->
+    <logger name="com.gmail.volodymyrdotsenko.cms" level="DEBUG"/>
+<!--     <logger name="org.springframework.security.web.authentication.rememberme" level="DEBUG"/> -->
+    <logger name="org.hibernate.tool" level="DEBUG"/>
+    <logger name="org.hibernate.sql" level="DEBUG"/>
+</configuration>
