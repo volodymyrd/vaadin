@@ -1,5 +1,7 @@
 package com.gmail.volodymyrdotsenko.cms.be.services.init;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +31,14 @@ public class Loader implements ApplicationListener<ContextRefreshedEvent> {
 
 		try {
 			UserRole role = new UserRole();
-			role.setName("ADMIN");
+			role.setName("ROLE_ADMIN");
 			User admin = new User();
-			admin.setEmail("admin");
+			admin.setEmail("admin@admin.com");
 			admin.setPassword(new BCryptPasswordEncoder().encode("admin"));
+			admin.setUserName("admin");
+			Calendar c = Calendar.getInstance();
+			c.set(9999, 11, 31, 0, 0, 0);
+			admin.setExpired(c.getTime());
 			admin.getRoles().add(role);
 
 			roleRepo.save(role);
