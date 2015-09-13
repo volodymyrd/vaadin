@@ -22,9 +22,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		User user = userRepo.findOneByEmailWithRoles(email).orElseThrow(
-				() -> new UsernameNotFoundException(String.format("User with email=%s was not found", email)));
+	public UserDetails loadUserByUsername(String userNameOrEmail) throws UsernameNotFoundException {
+		User user = null;
+
+		if (userNameOrEmail.contains("@"))
+			user = userRepo.findOneByEmailWithRoles(userNameOrEmail).orElseThrow(() -> new UsernameNotFoundException(
+					String.format("User with email=%s was not found", userNameOrEmail)));
+		else
+			user = userRepo.findOneByUserNameWithRoles(userNameOrEmail).orElseThrow(() -> new UsernameNotFoundException(
+					String.format("User with userName=%s was not found", userNameOrEmail)));
 
 		return new CurrentUser(user);
 	}

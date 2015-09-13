@@ -10,4 +10,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("SELECT u FROM User u INNER JOIN FETCH u.roles WHERE u.email=?1")
 	Optional<User> findOneByEmailWithRoles(String email);
+
+	@Query("SELECT u FROM User u INNER JOIN FETCH u.roles WHERE u.userName=?1")
+	Optional<User> findOneByUserNameWithRoles(String userName);
+
 }
