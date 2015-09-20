@@ -29,7 +29,7 @@ import org.vaadin.spring.sidebar.annotation.SideBarItem;
  * @author Petter Holmström (petter@vaadin.com)
  */
 @SpringComponent
-@SideBarItem(sectionId = Sections.OPERATIONS, caption = "Logout")
+@SideBarItem(sectionId = Sections.MAIN_MENU, caption = "Logout")
 @FontAwesomeIcon(FontAwesome.POWER_OFF)
 public class LogoutOperation implements Runnable {
 

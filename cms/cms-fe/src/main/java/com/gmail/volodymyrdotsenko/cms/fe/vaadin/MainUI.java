@@ -13,8 +13,12 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
+
+import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.vaadin.spring.i18n.I18N;
 import org.vaadin.spring.security.VaadinSecurity;
 import org.vaadin.spring.security.util.SecurityExceptionUtils;
 import org.vaadin.spring.sidebar.components.ValoSideBar;
@@ -42,9 +46,20 @@ public class MainUI extends UI {
 	@Autowired
 	ValoSideBar sideBar;
 
+	@Autowired
+	I18N i18n;
+
+	private String lang;
+
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
+
 	@Override
 	protected void init(VaadinRequest request) {
-		getPage().setTitle("Vaadin Shared Security Demo");
+		setLocale(new Locale(lang == null ? "en" : lang));
+		
+		getPage().setTitle(i18n.get("myMessageKey", "My argument"));
 		// Let's register a custom error handler to make the 'access denied'
 		// messages a bit friendlier.
 		setErrorHandler(new DefaultErrorHandler() {

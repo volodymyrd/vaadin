@@ -44,86 +44,94 @@ import org.vaadin.spring.security.VaadinSecurity;
 @Theme(ValoTheme.THEME_NAME)
 public class LoginUI extends UI {
 
-    @Autowired
-    VaadinSecurity vaadinSecurity;
+	private static final long serialVersionUID = 1L;
 
-    private TextField userName;
+	@Autowired
+	VaadinSecurity vaadinSecurity;
 
-    private PasswordField passwordField;
+	private TextField userName;
 
-    private CheckBox rememberMe;
+	private PasswordField passwordField;
 
-    private Button login;
+	private CheckBox rememberMe;
 
-    private Label loginFailedLabel;
-    private Label loggedOutLabel;
+	private Button login;
 
-    @Override
-    protected void init(VaadinRequest request) {
-        getPage().setTitle("Vaadin Shared Security Demo Login");
+	private Label loginFailedLabel;
+	private Label loggedOutLabel;
+	private TextField lang;
+	@Autowired
+	private MainUI mainUI;
 
-        FormLayout loginForm = new FormLayout();
-        loginForm.setSizeUndefined();
+	@Override
+	protected void init(VaadinRequest request) {
+		getPage().setTitle("Vaadin Shared Security Demo Login");
 
-        loginForm.addComponent(userName = new TextField("Username"));
-        loginForm.addComponent(passwordField = new PasswordField("Password"));
-        loginForm.addComponent(rememberMe = new CheckBox("Remember me"));
-        loginForm.addComponent(login = new Button("Login"));
-        login.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        login.setDisableOnClick(true);
-        login.setClickShortcut(ShortcutAction.KeyCode.ENTER);
-        login.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                login();
-            }
-        });
+		FormLayout loginForm = new FormLayout();
+		loginForm.setSizeUndefined();
 
-        VerticalLayout loginLayout = new VerticalLayout();
-        loginLayout.setSpacing(true);
-        loginLayout.setSizeUndefined();
+		loginForm.addComponent(userName = new TextField("Username"));
+		loginForm.addComponent(passwordField = new PasswordField("Password"));
+		loginForm.addComponent(rememberMe = new CheckBox("Remember me"));
+		loginForm.addComponent(lang = new TextField("Language"));
+		loginForm.addComponent(login = new Button("Login"));
+		login.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		login.setDisableOnClick(true);
+		login.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+		login.addClickListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(Button.ClickEvent event) {
+				login();
+			}
+		});
 
-        if (request.getParameter("logout") != null) {
-            loggedOutLabel = new Label("You have been logged out!");
-            loggedOutLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-            loggedOutLabel.setSizeUndefined();
-            loginLayout.addComponent(loggedOutLabel);
-            loginLayout.setComponentAlignment(loggedOutLabel, Alignment.BOTTOM_CENTER);
-        }
+		VerticalLayout loginLayout = new VerticalLayout();
+		loginLayout.setSpacing(true);
+		loginLayout.setSizeUndefined();
 
-        loginLayout.addComponent(loginFailedLabel = new Label());
-        loginLayout.setComponentAlignment(loginFailedLabel, Alignment.BOTTOM_CENTER);
-        loginFailedLabel.setSizeUndefined();
-        loginFailedLabel.addStyleName(ValoTheme.LABEL_FAILURE);
-        loginFailedLabel.setVisible(false);
+		if (request.getParameter("logout") != null) {
+			loggedOutLabel = new Label("You have been logged out!");
+			loggedOutLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+			loggedOutLabel.setSizeUndefined();
+			loginLayout.addComponent(loggedOutLabel);
+			loginLayout.setComponentAlignment(loggedOutLabel, Alignment.BOTTOM_CENTER);
+		}
 
-        loginLayout.addComponent(loginForm);
-        loginLayout.setComponentAlignment(loginForm, Alignment.TOP_CENTER);
+		loginLayout.addComponent(loginFailedLabel = new Label());
+		loginLayout.setComponentAlignment(loginFailedLabel, Alignment.BOTTOM_CENTER);
+		loginFailedLabel.setSizeUndefined();
+		loginFailedLabel.addStyleName(ValoTheme.LABEL_FAILURE);
+		loginFailedLabel.setVisible(false);
 
-        VerticalLayout rootLayout = new VerticalLayout(loginLayout);
-        rootLayout.setSizeFull();
-        rootLayout.setComponentAlignment(loginLayout, Alignment.MIDDLE_CENTER);
-        setContent(rootLayout);
-        setSizeFull();
-    }
+		loginLayout.addComponent(loginForm);
+		loginLayout.setComponentAlignment(loginForm, Alignment.TOP_CENTER);
 
-    private void login() {
-        try {
-            vaadinSecurity.login(userName.getValue(), passwordField.getValue(), rememberMe.getValue());
-        } catch (AuthenticationException ex) {
-            userName.focus();
-            userName.selectAll();
-            passwordField.setValue("");
-            loginFailedLabel.setValue(String.format("Login failed: %s", ex.getMessage()));
-            loginFailedLabel.setVisible(true);
-            if (loggedOutLabel != null) {
-                loggedOutLabel.setVisible(false);
-            }
-        } catch (Exception ex) {
-            Notification.show("An unexpected error occurred", ex.getMessage(), Notification.Type.ERROR_MESSAGE);
-            LoggerFactory.getLogger(getClass()).error("Unexpected error while logging in", ex);
-        } finally {
-            login.setEnabled(true);
-        }
-    }
+		VerticalLayout rootLayout = new VerticalLayout(loginLayout);
+		rootLayout.setSizeFull();
+		rootLayout.setComponentAlignment(loginLayout, Alignment.MIDDLE_CENTER);
+		setContent(rootLayout);
+		setSizeFull();
+	}
+
+	private void login() {
+		try {
+			vaadinSecurity.login(userName.getValue(), passwordField.getValue(), rememberMe.getValue());
+
+			mainUI.setLang(lang.getValue());
+		} catch (AuthenticationException ex) {
+			userName.focus();
+			userName.selectAll();
+			passwordField.setValue("");
+			loginFailedLabel.setValue(String.format("Login failed: %s", ex.getMessage()));
+			loginFailedLabel.setVisible(true);
+			if (loggedOutLabel != null) {
+				loggedOutLabel.setVisible(false);
+			}
+		} catch (Exception ex) {
+			Notification.show("An unexpected error occurred", ex.getMessage(), Notification.Type.ERROR_MESSAGE);
+			LoggerFactory.getLogger(getClass()).error("Unexpected error while logging in", ex);
+		} finally {
+			login.setEnabled(true);
+		}
+	}
 }
