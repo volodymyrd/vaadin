@@ -27,10 +27,12 @@ import org.vaadin.spring.sidebar.annotation.SideBarSections;
 @Component
 @SideBarSections({
         @SideBarSection(id = Sections.VIEWS, caption = "Views"),
-        @SideBarSection(id = Sections.OPERATIONS, caption = "Operations")
+        @SideBarSection(id = Sections.OPERATIONS, caption = "Operations"),
+        @SideBarSection(id = Sections.ADMINISTRATION, caption = "Administration")
 })
 public class Sections {
 
     public static final String VIEWS = "views";
     public static final String OPERATIONS = "operations";
+    public static final String ADMINISTRATION = "Administration";
 }
