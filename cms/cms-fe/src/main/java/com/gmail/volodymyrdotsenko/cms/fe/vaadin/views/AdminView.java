@@ -85,6 +85,8 @@ public class AdminView extends CustomComponent implements View {
 				new MHorizontalLayout(addNew, edit, delete), list).expand(list));
 		listEntities();
 		list.addMValueChangeListener(e -> adjustActionButtonState());
+
+		this.mainUI = mainUI;
 	}
 
 	protected void adjustActionButtonState() {
