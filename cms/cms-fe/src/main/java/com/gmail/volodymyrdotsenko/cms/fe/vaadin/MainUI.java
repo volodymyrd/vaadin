@@ -57,7 +57,7 @@ public class MainUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-		setLocale(new Locale(lang == null ? "en" : lang));
+		//setLocale(new Locale(lang == null ? "en" : lang));
 		
 		getPage().setTitle(i18n.get("myMessageKey", "My argument"));
 		// Let's register a custom error handler to make the 'access denied'

@@ -18,10 +18,12 @@ package com.gmail.volodymyrdotsenko.cms.fe.vaadin;
 import com.vaadin.annotations.Theme;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -30,6 +32,12 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
@@ -46,6 +54,8 @@ public class LoginUI extends UI {
 
 	private static final long serialVersionUID = 1L;
 
+	private Set<String> langSet = Stream.of("en", "ru").collect(Collectors.toSet());
+
 	@Autowired
 	VaadinSecurity vaadinSecurity;
 
@@ -59,9 +69,7 @@ public class LoginUI extends UI {
 
 	private Label loginFailedLabel;
 	private Label loggedOutLabel;
-	private TextField lang;
-	@Autowired
-	private MainUI mainUI;
+	private ComboBox lang = new ComboBox("Language", langSet);
 
 	@Override
 	protected void init(VaadinRequest request) {
@@ -71,9 +79,13 @@ public class LoginUI extends UI {
 		loginForm.setSizeUndefined();
 
 		loginForm.addComponent(userName = new TextField("Username"));
+		userName.setRequired(true);
 		loginForm.addComponent(passwordField = new PasswordField("Password"));
+		passwordField.setRequired(true);
 		loginForm.addComponent(rememberMe = new CheckBox("Remember me"));
-		loginForm.addComponent(lang = new TextField("Language"));
+		loginForm.addComponent(lang);
+		lang.setRequired(true);
+		lang.setNullSelectionAllowed(false);
 		loginForm.addComponent(login = new Button("Login"));
 		login.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		login.setDisableOnClick(true);
@@ -111,13 +123,19 @@ public class LoginUI extends UI {
 		rootLayout.setComponentAlignment(loginLayout, Alignment.MIDDLE_CENTER);
 		setContent(rootLayout);
 		setSizeFull();
+
+		String currentLang = getLocale().getLanguage();
+		if (langSet.contains(currentLang))
+			lang.select(currentLang);
+		else
+			lang.select("en");
 	}
 
 	private void login() {
 		try {
 			vaadinSecurity.login(userName.getValue(), passwordField.getValue(), rememberMe.getValue());
 
-			mainUI.setLang(lang.getValue());
+			VaadinSession.getCurrent().setLocale(new Locale((String) lang.getValue()));
 		} catch (AuthenticationException ex) {
 			userName.focus();
 			userName.selectAll();
