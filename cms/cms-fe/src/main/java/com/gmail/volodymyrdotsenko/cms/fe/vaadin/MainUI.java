@@ -14,8 +14,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
-import java.util.Locale;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.vaadin.spring.i18n.I18N;
@@ -35,25 +33,19 @@ public class MainUI extends UI {
 	private static final long serialVersionUID = 1L;
 
 	@Autowired
-	ApplicationContext applicationContext;
+	private ApplicationContext applicationContext;
 
 	@Autowired
-	VaadinSecurity vaadinSecurity;
+	private VaadinSecurity vaadinSecurity;
 
 	@Autowired
-	SpringViewProvider springViewProvider;
+	private SpringViewProvider springViewProvider;
 
 	@Autowired
-	ValoSideBar sideBar;
+	private ValoSideBar sideBar;
 
 	@Autowired
-	I18N i18n;
-
-	private String lang;
-
-	public void setLang(String lang) {
-		this.lang = lang;
-	}
+	private I18N i18n;
 
 	@Override
 	protected void init(VaadinRequest request) {
