@@ -73,7 +73,7 @@ public class LoginUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-		getPage().setTitle("Vaadin Shared Security Demo Login");
+		getPage().setTitle("CMS");
 
 		FormLayout loginForm = new FormLayout();
 		loginForm.setSizeUndefined();

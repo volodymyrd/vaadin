@@ -59,7 +59,7 @@ public class MainUI extends UI {
 	protected void init(VaadinRequest request) {
 		//setLocale(new Locale(lang == null ? "en" : lang));
 		
-		getPage().setTitle(i18n.get("myMessageKey", "My argument"));
+		getPage().setTitle(i18n.get("application.title"));
 		// Let's register a custom error handler to make the 'access denied'
 		// messages a bit friendlier.
 		setErrorHandler(new DefaultErrorHandler() {

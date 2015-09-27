@@ -20,7 +20,7 @@ import com.vaadin.ui.CustomComponent;
  */
 @Secured("ROLE_ADMIN")
 @SpringView(name = "users")
-@SideBarItem(sectionId = Sections.ADMINISTRATION, caption = "Users")
+@SideBarItem(sectionId = Sections.ADMINISTRATION, captionCode = "application.section.item.users")
 @FontAwesomeIcon(FontAwesome.USERS)
 public class UsersView extends CustomComponent implements View {
 

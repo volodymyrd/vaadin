@@ -29,19 +29,19 @@ import org.vaadin.spring.sidebar.annotation.SideBarItem;
  * @author Petter Holmström (petter@vaadin.com)
  */
 @SpringComponent
-@SideBarItem(sectionId = Sections.MAIN_MENU, caption = "Logout")
+@SideBarItem(sectionId = Sections.MAIN_MENU, captionCode = "application.section.item.logout")
 @FontAwesomeIcon(FontAwesome.POWER_OFF)
 public class LogoutOperation implements Runnable {
 
-    private final VaadinSecurity vaadinSecurity;
+	private final VaadinSecurity vaadinSecurity;
 
-    @Autowired
-    public LogoutOperation(VaadinSecurity vaadinSecurity) {
-        this.vaadinSecurity = vaadinSecurity;
-    }
+	@Autowired
+	public LogoutOperation(VaadinSecurity vaadinSecurity) {
+		this.vaadinSecurity = vaadinSecurity;
+	}
 
-    @Override
-    public void run() {
-        vaadinSecurity.logout();
-    }
+	@Override
+	public void run() {
+		vaadinSecurity.logout();
+	}
 }

@@ -25,10 +25,10 @@ import org.vaadin.spring.sidebar.annotation.SideBarSections;
  * @author Petter Holmström (petter@vaadin.com)
  */
 @Component
-@SideBarSections({ @SideBarSection(id = Sections.MAIN_MENU, caption = "Main Menu"),
-		@SideBarSection(id = Sections.VIEWS, captionCode = "myMessageKey"),
-		@SideBarSection(id = Sections.OPERATIONS, caption = "Operations"),
-		@SideBarSection(id = Sections.ADMINISTRATION, caption = "Administration") })
+@SideBarSections({ @SideBarSection(id = Sections.MAIN_MENU, captionCode="application.section.main_menu"),
+		//@SideBarSection(id = Sections.VIEWS, captionCode = "myMessageKey"),
+		//@SideBarSection(id = Sections.OPERATIONS, caption = "Operations"),
+		@SideBarSection(id = Sections.ADMINISTRATION, captionCode = "application.section.administration") })
 public class Sections {
 
 	public static final String MAIN_MENU = "main_menu";

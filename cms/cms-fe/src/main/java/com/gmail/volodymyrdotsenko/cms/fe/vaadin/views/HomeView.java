@@ -33,7 +33,7 @@ import org.vaadin.spring.sidebar.annotation.SideBarItem;
  * shown.
  */
 @SpringView(name = "")
-@SideBarItem(sectionId = Sections.MAIN_MENU, caption = "Home", order = 0)
+@SideBarItem(sectionId = Sections.MAIN_MENU, captionCode = "application.section.item.home", order = 0)
 @FontAwesomeIcon(FontAwesome.HOME)
 public class HomeView extends VerticalLayout implements View {
 
