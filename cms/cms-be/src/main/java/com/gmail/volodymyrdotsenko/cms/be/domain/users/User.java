@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.BaseEntity;
 
@@ -34,6 +35,7 @@ public class User extends BaseEntity {
 
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
+	@DateTimeFormat(pattern = "dd.MM.yyyy")
 	private Date expired;
 
 	private Boolean locked;

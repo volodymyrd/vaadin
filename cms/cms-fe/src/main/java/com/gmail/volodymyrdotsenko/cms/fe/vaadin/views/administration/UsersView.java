@@ -6,20 +6,17 @@ import org.vaadin.spring.i18n.I18N;
 import org.vaadin.spring.sidebar.annotation.FontAwesomeIcon;
 import org.vaadin.spring.sidebar.annotation.SideBarItem;
 
-import com.gmail.volodymyrdotsenko.cms.be.domain.PersonRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.users.User;
+import com.gmail.volodymyrdotsenko.cms.be.domain.users.UserRepository;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.MainUI;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.Sections;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.*;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -36,12 +33,12 @@ public class UsersView extends TabSheet implements View, CloseHandler {
 
 	private MainUI mainUI;
 
-	private PersonRepository repo;
+	private UserRepository repo;
 
 	private I18N i18n;
 
 	@Autowired
-	public UsersView(PersonRepository repo, MainUI mainUI, I18N i18n) {
+	public UsersView(UserRepository repo, MainUI mainUI, I18N i18n) {
 		this.repo = repo;
 		this.mainUI = mainUI;
 		this.i18n = i18n;
@@ -53,34 +50,46 @@ public class UsersView extends TabSheet implements View, CloseHandler {
 		addTab(buildUserList());
 	}
 
+	public void openUserForm(User user) {
+		UserForm form = new UserForm(user, repo, this, i18n);
+
+		form.setSizeFull();
+		form.setCaption("User: " + user.getUserName());
+
+		addTab(form).setClosable(true);
+		setSelectedTab(getComponentCount() - 1);
+	}
+
 	private Component buildUserList() {
-		final VerticalLayout vert = new VerticalLayout();
-		vert.setSizeFull();
-		vert.setCaption(i18n.get("admin.users.tab.users"));
-		
-		Button btn = new Button("test");
-		btn.addClickListener(e ->{
-			addTab(new Button("test")).setClosable(true);
-			setSelectedTab(getComponentCount() - 1);
-		});
-		vert.addComponent(btn);
+		final UsersList list = new UsersList(repo, mainUI, this, i18n);
+		list.setSizeFull();
+		list.setCaption(i18n.get("admin.users.tab.users"));
 
-//		VerticalLayout titleAndDrafts = new VerticalLayout();
-//		titleAndDrafts.setSizeUndefined();
-//		titleAndDrafts.setSpacing(true);
-//		titleAndDrafts.addStyleName("drafts");
-//		allDrafts.addComponent(titleAndDrafts);
-//		allDrafts.setComponentAlignment(titleAndDrafts, Alignment.MIDDLE_CENTER);
-//
-//		Label draftsTitle = new Label("Drafts");
-//		draftsTitle.addStyleName(ValoTheme.LABEL_H1);
-//		draftsTitle.setSizeUndefined();
-//		titleAndDrafts.addComponent(draftsTitle);
-//		titleAndDrafts.setComponentAlignment(draftsTitle, Alignment.TOP_CENTER);
-//
-//		titleAndDrafts.addComponent(buildDraftsList());
+		// Button btn = new Button("test");
+		// btn.addClickListener(e ->{
+		// addTab(new Button("test")).setClosable(true);
+		// setSelectedTab(getComponentCount() - 1);
+		// });
+		// vert.addComponent(btn);
 
-		return vert;
+		// VerticalLayout titleAndDrafts = new VerticalLayout();
+		// titleAndDrafts.setSizeUndefined();
+		// titleAndDrafts.setSpacing(true);
+		// titleAndDrafts.addStyleName("drafts");
+		// allDrafts.addComponent(titleAndDrafts);
+		// allDrafts.setComponentAlignment(titleAndDrafts,
+		// Alignment.MIDDLE_CENTER);
+		//
+		// Label draftsTitle = new Label("Drafts");
+		// draftsTitle.addStyleName(ValoTheme.LABEL_H1);
+		// draftsTitle.setSizeUndefined();
+		// titleAndDrafts.addComponent(draftsTitle);
+		// titleAndDrafts.setComponentAlignment(draftsTitle,
+		// Alignment.TOP_CENTER);
+		//
+		// titleAndDrafts.addComponent(buildDraftsList());
+
+		return list;
 	}
 
 	@Override
