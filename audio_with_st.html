@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head><title>Seasons in the Sun</title>
+<style type="text/css">
+html,body{padding:0;margin:0;width:100%;min-height:100%;background-color:#000;color:#f0f;}
+#lyrics{margin-left:3em;font: 700 2.3em arial,sans-serif;color:#0ff;text-align:center;}
+</style></head><body>
+<audio id="audio" preload="auto" controls>
+<source src="http://islmpeg.s3.amazonaws.com/mp3/TerryJacks-SeasonsInTheSun.mp3" type="audio/mpeg">
+<track id="trk" kind="subtitles" srclang="en" src="http://islmpeg.s3.amazonaws.com/mp3/SeasonsInTheSun.vtt" default  />
+</audio>
+<br/><div id="lyrics"></div><br/>
+<script type="text/javascript">
+//<![CDATA[
+var lyrics = document.getElementById('lyrics');
+var audio = document.getElementById('audio');
+var track = document.getElementById('trk');
+var textTrack = track.track;
+track.addEventListener("cuechange", cueChange, false);
+
+function init(){audio.volume = .3;audio.play();}
+function cueChange(){
+var cues = textTrack.activeCues;
+if (cues.length > 0){
+lyrics.innerHTML = cues[0].text.replace(/\n/g, '<br>');}}
+window.onload = init;
+//]]>
+</script></body></html>
