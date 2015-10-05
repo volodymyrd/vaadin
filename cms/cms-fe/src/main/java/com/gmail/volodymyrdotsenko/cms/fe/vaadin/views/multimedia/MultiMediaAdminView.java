@@ -1,39 +1,32 @@
 package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.UUID;
 
 import org.springframework.security.access.annotation.Secured;
 import org.vaadin.spring.sidebar.annotation.FontAwesomeIcon;
 import org.vaadin.spring.sidebar.annotation.SideBarItem;
-import org.vaadin.viritin.label.RichText;
 
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.Sections;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.DownloadStream;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.ui.Audio;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.CustomLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 
 @Secured({ "ROLE_USER", "ROLE_ADMIN" })
 @SpringView(name = "mmadmin")
@@ -48,8 +41,32 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	private Link linkMp3;
 	private Resource resourceVtt;
 	private Resource resourceMp3;
+	
+	private final VerticalLayout mainContainer = new VerticalLayout();
+	private final VerticalLayout contentLayout = new VerticalLayout();
+	private final MultiMediaMenuBar menu = new MultiMediaMenuBar(this);
+	private final MediaLibraryTree mediaLibraryTree = new MediaLibraryTree();
 
 	public MultiMediaAdminView() {
+		
+		HorizontalSplitPanel spliter = new HorizontalSplitPanel();
+		spliter.setSizeFull();
+		spliter.setSplitPosition(20, Unit.PERCENTAGE);
+
+		spliter.setFirstComponent(mediaLibraryTree	);
+		spliter.setSecondComponent(contentLayout);
+
+		mainContainer.addComponent(menu);
+		mainContainer.addComponent(spliter);
+		
+		setCompositionRoot(mainContainer);
+	}
+	
+	public void openView(Component componet){
+		contentLayout.addComponent(componet);
+	}
+
+	public void MultiMediaAdminView() {
 		vl.setMargin(true);
 
 		Button newBtn = new Button("New");
@@ -63,6 +80,8 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		// });
 
 		newBtn.addClickListener(new ClickListener() {
+
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void buttonClick(ClickEvent event) {
