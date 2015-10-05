@@ -3,14 +3,14 @@ package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.vaadin.annotations.StyleSheet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.ProgressIndicator;
+import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FinishedEvent;
@@ -19,173 +19,195 @@ import com.vaadin.ui.Upload.StartedEvent;
 import com.vaadin.ui.Upload.StartedListener;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.VerticalLayout;
-
-import com.vaadin.ui.Upload.FailedEvent;
-import com.vaadin.ui.Upload.FinishedEvent;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.StartedEvent;
-import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Window;
 
 public class AdioItemView extends VerticalLayout {
 
 	private static final long serialVersionUID = 1L;
 
-	private Label state = new Label();
-	private Label result = new Label();
-	private Label fileName = new Label();
-	private Label textualProgress = new Label();
-
-	private ProgressIndicator pi = new ProgressIndicator();
-
-	private LineBreakCounter counter = new LineBreakCounter();
-
-	private Upload upload = new Upload(null, counter);
+	private final Upload upload;
 
 	public AdioItemView() {
-		setMargin(true);
+		LineBreakCounter lineBreakCounter = new LineBreakCounter();
+		lineBreakCounter.setSlow(true);
 
-        setSpacing(true);
+		upload = new Upload(null, lineBreakCounter);
+		final UploadInfoWindow uploadInfoWindow = new UploadInfoWindow(upload, lineBreakCounter);
 
-        addComponent(new Label(
-                "Upload a file and we'll count the number of line break characters (\\n) found in it."));
+		upload.setImmediate(false);
+		upload.setButtonCaption("Upload File");
+		upload.addStartedListener(new StartedListener() {
 
-        // make analyzing start immediatedly when file is selected
-        upload.setImmediate(true);
-        upload.setButtonCaption("Upload File");
-        addComponent(upload);
+			private static final long serialVersionUID = 1L;
 
-        CheckBox handBrake = new CheckBox("Simulate slow server");
-        handBrake.setValue(true);
-        counter.setSlow(true);
-        handBrake
-                .setDescription("Sleep for 100ms after each kilobyte to simulate slower processing/bandwidth. This is to show progress indicator even with rather small files.");
-        handBrake.addListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                counter.setSlow(event.getButton().booleanValue());
-            }
-        });
+			@Override
+			public void uploadStarted(final StartedEvent event) {
+				if (uploadInfoWindow.getParent() == null) {
+					UI.getCurrent().addWindow(uploadInfoWindow);
+				}
+				uploadInfoWindow.setClosable(false);
+			}
+		});
 
-        final Button cancelProcessing = new Button("Cancel");
-        cancelProcessing.addListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                upload.interruptUpload();
-            }
-        });
-        cancelProcessing.setVisible(false);
-        cancelProcessing.setStyleName("small");
+		upload.addFinishedListener(new Upload.FinishedListener() {
 
-        handBrake.setImmediate(true);
+			private static final long serialVersionUID = 1L;
 
-        addComponent(handBrake);
+			@Override
+			public void uploadFinished(final FinishedEvent event) {
+				uploadInfoWindow.setClosable(true);
+			}
+		});
 
-        Panel p = new Panel("Status");
-        p.setSizeUndefined();
-        FormLayout l = new FormLayout();
-        l.setMargin(true);
-        p.setContent(l);
-        HorizontalLayout stateLayout = new HorizontalLayout();
-        stateLayout.setSpacing(true);
-        stateLayout.addComponent(state);
-        stateLayout.addComponent(cancelProcessing);
-        stateLayout.setCaption("Current state");
-        state.setValue("Idle");
-        l.addComponent(stateLayout);
-        fileName.setCaption("File name");
-        l.addComponent(fileName);
-        result.setCaption("Line breaks counted");
-        l.addComponent(result);
-        pi.setCaption("Progress");
-        pi.setVisible(false);
-        l.addComponent(pi);
-        textualProgress.setVisible(false);
-        l.addComponent(textualProgress);
-
-        addComponent(p);
-
-        upload.addListener(new StartedListener() {
-            public void uploadStarted(StartedEvent event) {
-                // this method gets called immediatedly after upload is
-                // started
-                pi.setValue(0f);
-                pi.setVisible(true);
-                pi.setPollingInterval(500); // hit server frequantly to get
-                textualProgress.setVisible(true);
-                // updates to client
-                state.setValue("Uploading");
-                fileName.setValue(event.getFilename());
-
-                cancelProcessing.setVisible(true);
-            }
-        });
-
-        upload.addListener(new Upload.ProgressListener() {
-            public void updateProgress(long readBytes, long contentLength) {
-                // this method gets called several times during the update
-                pi.setValue(new Float(readBytes / (float) contentLength));
-                textualProgress.setValue("Processed " + readBytes
-                        + " bytes of " + contentLength);
-                result.setValue(counter.getLineBreakCount() + " (counting...)");
-            }
-
-        });
-
-        upload.addListener(new SucceededListener() {
-            public void uploadSucceeded(SucceededEvent event) {
-                result.setValue(counter.getLineBreakCount() + " (total)");
-            }
-        });
-
-        upload.addListener(new FailedListener() {
-            public void uploadFailed(FailedEvent event) {
-                result.setValue(counter.getLineBreakCount()
-                        + " (counting interrupted at "
-                        + Math.round(100 * (Float) pi.getValue()) + "%)");
-            }
-        });
-
-        upload.addListener(new FinishedListener() {
-            public void uploadFinished(FinishedEvent event) {
-                state.setValue("Idle");
-                pi.setVisible(false);
-                textualProgress.setVisible(false);
-                cancelProcessing.setVisible(false);
-            }
-        });
+		addComponent(upload);
 	}
 
-	public static class LineBreakCounter implements Receiver {
-		
+	// @StyleSheet("uploadexample.css")
+	private static class UploadInfoWindow extends Window implements Upload.StartedListener, Upload.ProgressListener,
+			Upload.FailedListener, Upload.SucceededListener, Upload.FinishedListener {
+
 		private static final long serialVersionUID = 1L;
-		
-		private String fileName;
-		private String mtype;
+
+		private final Label state = new Label();
+		private final Label result = new Label();
+		private final Label fileName = new Label();
+		private final Label textualProgress = new Label();
+
+		private final ProgressBar progressBar = new ProgressBar();
+		private final Button cancelButton;
+		private final LineBreakCounter counter;
+
+		public UploadInfoWindow(final Upload upload, final LineBreakCounter lineBreakCounter) {
+			super("Status");
+			this.counter = lineBreakCounter;
+
+			setWidth(350, Unit.PIXELS);
+
+			addStyleName("upload-info");
+
+			setResizable(false);
+			setDraggable(false);
+
+			final FormLayout l = new FormLayout();
+			setContent(l);
+			l.setMargin(true);
+
+			final HorizontalLayout stateLayout = new HorizontalLayout();
+			stateLayout.setSpacing(true);
+			stateLayout.addComponent(state);
+
+			cancelButton = new Button("Cancel");
+			cancelButton.addClickListener(new Button.ClickListener() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public void buttonClick(final ClickEvent event) {
+					upload.interruptUpload();
+				}
+			});
+			cancelButton.setVisible(false);
+			cancelButton.setStyleName("small");
+			stateLayout.addComponent(cancelButton);
+
+			stateLayout.setCaption("Current state");
+			state.setValue("Idle");
+			l.addComponent(stateLayout);
+
+			fileName.setCaption("File name");
+			l.addComponent(fileName);
+
+			result.setCaption("Line breaks counted");
+			l.addComponent(result);
+
+			progressBar.setCaption("Progress");
+			progressBar.setVisible(false);
+			l.addComponent(progressBar);
+
+			textualProgress.setVisible(false);
+			l.addComponent(textualProgress);
+
+			upload.addStartedListener(this);
+			upload.addProgressListener(this);
+			upload.addFailedListener(this);
+			upload.addSucceededListener(this);
+			upload.addFinishedListener(this);
+
+		}
+
+		@Override
+		public void uploadFinished(final FinishedEvent event) {
+			state.setValue("Idle");
+			progressBar.setVisible(false);
+			textualProgress.setVisible(false);
+			cancelButton.setVisible(false);
+		}
+
+		@Override
+		public void uploadStarted(final StartedEvent event) {
+			// this method gets called immediately after upload is started
+			progressBar.setValue(0f);
+			progressBar.setVisible(true);
+			UI.getCurrent().setPollInterval(500);
+			textualProgress.setVisible(true);
+			// updates to client
+			state.setValue("Uploading");
+			fileName.setValue(event.getFilename());
+
+			cancelButton.setVisible(true);
+		}
+
+		@Override
+		public void updateProgress(final long readBytes, final long contentLength) {
+			// this method gets called several times during the update
+			progressBar.setValue(new Float(readBytes / (float) contentLength));
+			textualProgress.setValue("Processed " + readBytes + " bytes of " + contentLength);
+			result.setValue(counter.getLineBreakCount() + " (counting...)");
+		}
+
+		@Override
+		public void uploadSucceeded(final SucceededEvent event) {
+			result.setValue(counter.getLineBreakCount() + " (total)");
+		}
+
+		@Override
+		public void uploadFailed(final FailedEvent event) {
+			result.setValue(counter.getLineBreakCount() + " (counting interrupted at "
+					+ Math.round(100 * progressBar.getValue()) + "%)");
+		}
+	}
+
+	private static class LineBreakCounter implements Receiver {
+
+		private static final long serialVersionUID = 1L;
 
 		private int counter;
-		private int total;
+		private long total;
 		private boolean sleep;
 
 		/**
 		 * return an OutputStream that simply counts lineends
 		 */
-		public OutputStream receiveUpload(String filename, String MIMEType) {
+		@Override
+		public OutputStream receiveUpload(final String filename, final String MIMEType) {
 			counter = 0;
 			total = 0;
-			fileName = filename;
-			mtype = MIMEType;
 			return new OutputStream() {
 				private static final int searchedByte = '\n';
 
 				@Override
-				public void write(int b) throws IOException {
-					total++;
+				public void write(final int b) throws IOException {
+					
 					if (b == searchedByte) {
 						counter++;
 					}
+
+					total++;
+					
 					if (sleep && total % 1000 == 0) {
 						try {
 							Thread.sleep(100);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
+						} catch (final InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
@@ -193,21 +215,12 @@ public class AdioItemView extends VerticalLayout {
 			};
 		}
 
-		public String getFileName() {
-			return fileName;
-		}
-
-		public String getMimeType() {
-			return mtype;
-		}
-
 		public int getLineBreakCount() {
 			return counter;
 		}
 
-		public void setSlow(boolean value) {
+		public void setSlow(final boolean value) {
 			sleep = value;
 		}
-
 	}
 }
