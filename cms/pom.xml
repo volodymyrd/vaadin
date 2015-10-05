@@ -18,7 +18,7 @@
 
 	<properties>
 		<vaadin.version>7.5.5</vaadin.version>
-		<vaadin-spring.version>1.0-SNAPSHOT</vaadin-spring.version>
+		<vaadin-spring.version>1.0.0</vaadin-spring.version>
 		<vaadin-spring.ext.version>0.0.7-SNAPSHOT</vaadin-spring.ext.version>
 		<tomcat.version>7.0.55</tomcat.version>
 		<!-- Server push is not yet working with Tomcat 8, at least not when using 
@@ -172,6 +172,7 @@
 					<include>*.xml</include>
 					<include>*.md</include>
 					<include>*.vtt</include>
+					<include>*.mp3</include>
 				</includes>
 			</resource>
 		</resources>

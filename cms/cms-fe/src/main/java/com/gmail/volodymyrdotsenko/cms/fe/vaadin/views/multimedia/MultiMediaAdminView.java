@@ -25,12 +25,15 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Audio;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 
 @Secured({ "ROLE_USER", "ROLE_ADMIN" })
 @SpringView(name = "mmadmin")
@@ -41,17 +44,38 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	private static final long serialVersionUID = 1L;
 
 	private VerticalLayout vl = new VerticalLayout();
+	private Link linkVtt;
+	private Link linkMp3;
+	private Resource resourceVtt;
+	private Resource resourceMp3;
 
 	public MultiMediaAdminView() {
 		vl.setMargin(true);
-		
-		
 
-	}
+		Button newBtn = new Button("New");
+		// newBtn.addClickListener(e -> {
+		// try {
+		// buildAudio();
+		// } catch (Exception e1) {
+		// // TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// }
+		// });
 
-	public void buildAudio() throws URISyntaxException {
-		
-		StreamResource resource = new StreamResource(new StreamSource() {
+		newBtn.addClickListener(new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				try {
+					buildAudio();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+
+		resourceVtt = new StreamResource(new StreamSource() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -63,17 +87,40 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 
 		}, "scorpions_send_me_an_angel.txt.vtt");
 
-		Link link = new Link("Link to the image file", resource);
+		resourceMp3 = new StreamResource(new StreamSource() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public InputStream getStream() {
+				// TODO Auto-generated method stub
+				return getClass().getResourceAsStream("/scorpions_send_me_an_angel.mp3");
+			}
+
+		}, "scorpions_send_me_an_angel.mp3");
+
+		linkVtt = new Link("vtt", resourceVtt);
+		linkMp3 = new Link("mp3", resourceMp3);
+
+		vl.addComponent(newBtn);
+		vl.addComponent(linkMp3);
+		vl.addComponent(linkVtt);
+
+		setCompositionRoot(vl);
+	}
+
+	public void buildAudio() throws URISyntaxException {
+
 		String protocol = UI.getCurrent().getPage().getLocation().getScheme();
 		String currentUrl = UI.getCurrent().getPage().getLocation().getAuthority();
-		String cid = link.getConnectorId();
-		Integer uiId = link.getUI().getUIId();
-		String filename = resource.getFilename();
-		System.out.println(protocol + "://" + currentUrl + "/APP/connector/" + "" + "/" + "" + "/source/" + filename);
 
-		vl.addComponent(link);
-		setCompositionRoot(vl);
+		String mp3Url = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/" + linkMp3.getUI().getUIId()
+				+ "/" + linkMp3.getConnectorId() + "/href/" + ((StreamResource) resourceMp3).getFilename();
+		System.out.println(mp3Url);
 
+		String vttUrl = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/" + linkVtt.getUI().getUIId()
+				+ "/" + linkVtt.getConnectorId() + "/href/" + ((StreamResource) resourceVtt).getFilename();
+		System.out.println(vttUrl);
 
 		CustomLayout sample = new CustomLayout();
 		vl.addComponent(sample);
@@ -88,10 +135,9 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 				+ " function timeUpdate(){ timeUp.innerHTML=audio.currentTime;} ";
 		// + " //]]>";
 
-		sample.setTemplateContents("<audio id='audio' preload='auto' controls> "
-				+ " <source src='http://localhost:8180/ielts/task1/scorpions_send_me_an_angel.mp3' type='audio/mpeg'>"
-				+ " <track id='trk' kind='subtitles' srclang='en' src='http://localhost:8180/ielts/task1/scorpions_send_me_an_angel.txt.vtt' default  /></audio>"
-				+ " <br/><div id='lyrics'></div><br/><div id='timeUp'></div><br/>");
+		sample.setTemplateContents("<audio id='audio' preload='auto' controls> " + " <source src='" + mp3Url
+				+ "' type='audio/mpeg'>" + " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl
+				+ "' default  /></audio>" + " <br/><div id='lyrics'></div><br/><div id='timeUp'></div><br/>");
 
 		// Audio sample = new Audio();
 		// final Resource audioResource = new ExternalResource(
@@ -113,11 +159,12 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 
 		System.out.println("basepath:" + basepath);
 
-//		URL url = getClass().getResource("/scorpions_send_me_an_angel.txt.vtt");
-//		FileResource resource = new FileResource(new File(url.toURI()));
-//		// Resource r = new StreamResource();
-//		System.out.println("resource:" + resource);
-//		ExternalResource r = new ExternalResource(url);
+		// URL url =
+		// getClass().getResource("/scorpions_send_me_an_angel.txt.vtt");
+		// FileResource resource = new FileResource(new File(url.toURI()));
+		// // Resource r = new StreamResource();
+		// System.out.println("resource:" + resource);
+		// ExternalResource r = new ExternalResource(url);
 
 	}
 
