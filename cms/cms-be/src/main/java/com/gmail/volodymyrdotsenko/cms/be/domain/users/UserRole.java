@@ -9,13 +9,13 @@ import org.hibernate.validator.constraints.NotBlank;
 import com.gmail.volodymyrdotsenko.cms.be.domain.BaseEntity;
 
 @Entity
-@Table(name = "usr_roles")
+@Table(name = "USR_ROLE")
 public class UserRole extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
 	@NotBlank
-	@Column(name = "name", nullable = false, length = 100)
+	@Column(name = "NAME", nullable = false, length = 100)
 	private String name;
 
 	private String description;

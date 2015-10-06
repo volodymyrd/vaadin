@@ -1,7 +1,6 @@
 package com.gmail.volodymyrdotsenko.cms.be.services.init;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.gmail.volodymyrdotsenko.cms.be.domain.local.Language;
+import com.gmail.volodymyrdotsenko.cms.be.domain.local.LanguageRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.users.RoleRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.users.User;
 import com.gmail.volodymyrdotsenko.cms.be.domain.users.UserRepository;
@@ -26,10 +27,22 @@ public class Loader implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private RoleRepository roleRepo;
 
+	@Autowired
+	private LanguageRepository langRepo;
+
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		logger.info("Spring context refreshed event");
 
 		try {
+			// Languages
+			Language l = new Language("en", "English", "en");
+			langRepo.save(l);
+			l = new Language("ru", "English", "ru");
+			langRepo.save(l);
+			l = new Language("ua", "English", "ua");
+			langRepo.save(l);
+
+			// Users
 			UserRole role = new UserRole();
 			role.setName("ROLE_ADMIN");
 			User admin = new User();

@@ -15,6 +15,7 @@
  */
 package com.gmail.volodymyrdotsenko.cms.fe.vaadin;
 
+import com.gmail.volodymyrdotsenko.cms.be.domain.local.LanguageRepository;
 import com.vaadin.annotations.Theme;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.VaadinRequest;
@@ -33,10 +34,9 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,11 @@ public class LoginUI extends UI {
 
 	private static final long serialVersionUID = 1L;
 
-	private Set<String> langSet = Stream.of("en", "ru").collect(Collectors.toSet());
+	private final Set<String> langSet = new HashSet<>();// = Stream.of("en",
+														// "ru").collect(Collectors.toSet());
+
+	@Autowired
+	LanguageRepository langRepo;
 
 	@Autowired
 	VaadinSecurity vaadinSecurity;
@@ -69,10 +73,16 @@ public class LoginUI extends UI {
 
 	private Label loginFailedLabel;
 	private Label loggedOutLabel;
-	private ComboBox lang = new ComboBox("Language", langSet);
+	private ComboBox lang;
 
 	@Override
 	protected void init(VaadinRequest request) {
+		langRepo.findAll().forEach(e -> {
+			langSet.add(e.getCode());
+		});
+
+		lang = new ComboBox("Language", langSet);
+
 		getPage().setTitle("CMS");
 
 		FormLayout loginForm = new FormLayout();
@@ -90,11 +100,8 @@ public class LoginUI extends UI {
 		login.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		login.setDisableOnClick(true);
 		login.setClickShortcut(ShortcutAction.KeyCode.ENTER);
-		login.addClickListener(new Button.ClickListener() {
-			@Override
-			public void buttonClick(Button.ClickEvent event) {
-				login();
-			}
+		login.addClickListener(e -> {
+			login();
 		});
 
 		VerticalLayout loginLayout = new VerticalLayout();
