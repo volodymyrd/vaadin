@@ -1,6 +1,8 @@
 package com.gmail.volodymyrdotsenko.cms.be.services.init;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.local.Language;
 import com.gmail.volodymyrdotsenko.cms.be.domain.local.LanguageRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderLocal;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.users.RoleRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.users.User;
 import com.gmail.volodymyrdotsenko.cms.be.domain.users.UserRepository;
@@ -30,6 +35,9 @@ public class Loader implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private LanguageRepository langRepo;
 
+	@Autowired
+	private FolderRepository folderRepo;
+
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		logger.info("Spring context refreshed event");
 
@@ -37,9 +45,9 @@ public class Loader implements ApplicationListener<ContextRefreshedEvent> {
 			// Languages
 			Language l = new Language("en", "English", "en");
 			langRepo.save(l);
-			l = new Language("ru", "English", "ru");
+			l = new Language("ru", "Русский", "ru");
 			langRepo.save(l);
-			l = new Language("ua", "English", "ua");
+			l = new Language("ua", "Українська", "ua");
 			langRepo.save(l);
 
 			// Users
@@ -56,6 +64,15 @@ public class Loader implements ApplicationListener<ContextRefreshedEvent> {
 
 			roleRepo.save(role);
 			userRepo.save(admin);
+
+			// Root folder
+			Folder f = new Folder();
+			Map<Language, FolderLocal> fl = new HashMap<>();
+			langRepo.findAll().forEach(e -> {
+				fl.put(e, new FolderLocal("root"));
+			});
+			f.setLocal(fl);
+			folderRepo.save(f);
 		} catch (Exception ex) {
 			logger.severe(ex.getMessage());
 		}

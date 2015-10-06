@@ -1,21 +1,14 @@
 package com.gmail.volodymyrdotsenko.cms.be.domain.media;
 
-import java.io.Serializable;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@Embeddable
-public class FolderLocal implements Serializable {
+@Entity
+@Table(name = "MEDIA_ITEM_AUDIOS")
+//@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public class AudioItem extends MediaItem {
 
 	private static final long serialVersionUID = 1L;
-
-	public FolderLocal() {
-	}
-
-	public FolderLocal(String name) {
-		this.name = name;
-	}
 
 	@NotNull
 	@Column(name = "NAME", length = 255)

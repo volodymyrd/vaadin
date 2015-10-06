@@ -34,6 +34,9 @@ public class Folder extends BaseEntity {
 	@MapKeyJoinColumn(name = "CODE")
 	private Map<Language, FolderLocal> local = new HashMap<>();
 
+//	@OneToMany(mappedBy = "folder", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+//	private Set<MediaItem> items = new HashSet<>();
+
 	public Folder getParent() {
 		return parent;
 	}

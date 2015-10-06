@@ -1,18 +1,14 @@
 package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
-import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItem;
-import com.mpatric.mp3agic.Mp3File;
-import com.vaadin.server.Page;
+import com.vaadin.annotations.StyleSheet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
@@ -25,16 +21,15 @@ import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class AdioItemView extends VerticalLayout {
+public class UploadProgressExample extends VerticalLayout {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Upload upload;
-	private AudioItem item = new AudioItem();
 
-	public AdioItemView() {
+	public UploadProgressExample() {
 		LineBreakCounter lineBreakCounter = new LineBreakCounter();
-		// lineBreakCounter.setSlow(true);
+		lineBreakCounter.setSlow(true);
 
 		upload = new Upload(null, lineBreakCounter);
 		final UploadInfoWindow uploadInfoWindow = new UploadInfoWindow(upload, lineBreakCounter);
@@ -74,6 +69,7 @@ public class AdioItemView extends VerticalLayout {
 		private static final long serialVersionUID = 1L;
 
 		private final Label state = new Label();
+		private final Label result = new Label();
 		private final Label fileName = new Label();
 		private final Label textualProgress = new Label();
 
@@ -89,8 +85,8 @@ public class AdioItemView extends VerticalLayout {
 
 			addStyleName("upload-info");
 
-			setResizable(true);
-			setDraggable(true);
+			setResizable(false);
+			setDraggable(false);
 
 			final FormLayout l = new FormLayout();
 			setContent(l);
@@ -120,6 +116,9 @@ public class AdioItemView extends VerticalLayout {
 
 			fileName.setCaption("File name");
 			l.addComponent(fileName);
+
+			result.setCaption("Line breaks counted");
+			l.addComponent(result);
 
 			progressBar.setCaption("Progress");
 			progressBar.setVisible(false);
@@ -163,34 +162,18 @@ public class AdioItemView extends VerticalLayout {
 			// this method gets called several times during the update
 			progressBar.setValue(new Float(readBytes / (float) contentLength));
 			textualProgress.setValue("Processed " + readBytes + " bytes of " + contentLength);
-			// result.setValue(counter.getLineBreakCount() + " (counting...)");
+			result.setValue(counter.getLineBreakCount() + " (counting...)");
 		}
 
 		@Override
 		public void uploadSucceeded(final SucceededEvent event) {
-			// result.setValue(counter.getLineBreakCount() + " (total)");
-
-			try {
-				Mp3File mp3file = new Mp3File(counter.getFile());
-
-				System.out.println("Length of this mp3 is: " + mp3file.getLengthInSeconds() + " seconds");
-				System.out
-						.println("Bitrate: " + mp3file.getBitrate() + " kbps " + (mp3file.isVbr() ? "(VBR)" : "(CBR)"));
-				System.out.println("Sample rate: " + mp3file.getSampleRate() + " Hz");
-				System.out.println("Has ID3v1 tag?: " + (mp3file.hasId3v1Tag() ? "YES" : "NO"));
-				System.out.println("Has ID3v2 tag?: " + (mp3file.hasId3v2Tag() ? "YES" : "NO"));
-				System.out.println("Has custom tag?: " + (mp3file.hasCustomTag() ? "YES" : "NO"));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			result.setValue(counter.getLineBreakCount() + " (total)");
 		}
 
 		@Override
 		public void uploadFailed(final FailedEvent event) {
-			// result.setValue(counter.getLineBreakCount() + " (counting
-			// interrupted at "
-			// + Math.round(100 * progressBar.getValue()) + "%)");
+			result.setValue(counter.getLineBreakCount() + " (counting interrupted at "
+					+ Math.round(100 * progressBar.getValue()) + "%)");
 		}
 	}
 
@@ -198,28 +181,46 @@ public class AdioItemView extends VerticalLayout {
 
 		private static final long serialVersionUID = 1L;
 
-		private File file;
+		private int counter;
+		private long total;
+		private boolean sleep;
 
+		/**
+		 * return an OutputStream that simply counts lineends
+		 */
 		@Override
 		public OutputStream receiveUpload(final String filename, final String MIMEType) {
+			counter = 0;
+			total = 0;
+			return new OutputStream() {
+				private static final int searchedByte = '\n';
 
-			// Create upload stream
-			FileOutputStream fos = null; // Stream to write to
-			try {
-				// Open the file for writing.
-				file = new File("/tmp/" + filename);
-				fos = new FileOutputStream(file);
-			} catch (final java.io.FileNotFoundException e) {
-				new Notification("Could not open file<br/>", e.getMessage(), Notification.Type.ERROR_MESSAGE)
-						.show(Page.getCurrent());
-				return null;
-			}
+				@Override
+				public void write(final int b) throws IOException {
+					
+					if (b == searchedByte) {
+						counter++;
+					}
 
-			return fos; // Return the output stream to write to
+					total++;
+					
+					if (sleep && total % 1000 == 0) {
+						try {
+							Thread.sleep(100);
+						} catch (final InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			};
 		}
 
-		public File getFile() {
-			return file;
+		public int getLineBreakCount() {
+			return counter;
+		}
+
+		public void setSlow(final boolean value) {
+			sleep = value;
 		}
 	}
 }
