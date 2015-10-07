@@ -10,6 +10,7 @@ import org.vaadin.spring.sidebar.annotation.SideBarItem;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemContentRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItem;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.Sections;
@@ -17,6 +18,7 @@ import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.EmbeddedView;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
@@ -28,6 +30,7 @@ import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
@@ -56,6 +59,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 
 	private final FolderRepository folderRepo;
 	private final MadiaItemRepository mediaItemRepo;
+	//private final MadiaItemContentRepository mediaItemContentRepo;
 
 	@Autowired
 	public MultiMediaAdminView(FolderRepository folderRepo, MadiaItemRepository mediaItemRepo) {
@@ -94,7 +98,10 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	}
 
 	public void save(MediaItem audioItem) {
+		audioItem.getContent().getContent();
 		mediaItemRepo.save(audioItem);
+		
+		new Notification("Saved successful", Notification.Type.HUMANIZED_MESSAGE).show(Page.getCurrent());
 	}
 
 	public void MultiMediaAdminView() {

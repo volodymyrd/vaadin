@@ -28,7 +28,7 @@ public abstract class BaseEntity implements Serializable {
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "date_create", nullable = false)
-	private Date dateCreate;
+	private Date dateCreate = new Date();
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "date_update")

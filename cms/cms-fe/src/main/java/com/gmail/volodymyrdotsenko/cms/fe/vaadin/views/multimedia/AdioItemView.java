@@ -1,25 +1,36 @@
 package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.form.AbstractForm;
 import org.vaadin.viritin.layouts.MFormLayout;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItem;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItemContent;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.EmbeddedView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView.SuccessHandler;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.Mp3File;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.Page;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Link;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -36,6 +47,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	private final TabSheet tabs = new TabSheet();
 	private final UploadProgressView upload = new UploadProgressView(this);
 	private AudioInfoForm audioInfoForm;
+	private final Link audioFileLink = new Link();
 
 	private final AudioItem item;
 
@@ -70,8 +82,10 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		@Override
 		protected Component createContent() {
 
-			VerticalLayout vl = new VerticalLayout(
-					new MFormLayout(name, lengthView, track, artist, title, album, year, genre, genreDescription, comment)
+			HorizontalLayout vl = new HorizontalLayout(
+					new MFormLayout(name, lengthView, track, artist, title)
+							.withMargin(new MarginInfo(false, false, false, true)),
+					new MFormLayout(album, year, genre, genreDescription, comment)
 							.withMargin(new MarginInfo(false, false, false, true)));
 
 			return vl;
@@ -80,7 +94,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 	public AdioItemView(MultiMediaAdminView mainView) {
 		this.mainView = mainView;
-		
+
 		item = new AudioItem();
 		item.setFolder(mainView.getSlectedFolder());
 
@@ -122,7 +136,37 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				mainView.save(item);
+				if (audioInfoForm.isValid()) {
+					mainView.save(item);
+
+					if (audioFileLink.getResource() instanceof FileResource) {
+						File f = ((FileResource) audioFileLink.getResource()).getSourceFile();
+						if (f != null)
+							try {
+								Files.deleteIfExists(f.toPath());
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+					}
+
+					audioFileLink.setVisible(true);
+					audioFileLink.setResource(new StreamResource(new StreamSource() {
+
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						public InputStream getStream() {
+							return new ByteArrayInputStream(item.getContent().getContent());
+						}
+
+					}, item.getName() + ".mp3"));
+
+					audioFileLink.setCaption(item.getName());
+					audioFileLink.setTargetName("_blank");
+
+				} else
+					new Notification("There are a few errors exist", Notification.Type.ERROR_MESSAGE)
+							.show(Page.getCurrent());
 			}
 		});
 
@@ -149,16 +193,20 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	}
 
 	private Component buildTab1() {
+		VerticalLayout v = new VerticalLayout();
+		v.setMargin(new MarginInfo(true, false, true, true));
+		v.addComponent(audioFileLink);
+
 		HorizontalLayout h = new HorizontalLayout();
-		// h.setSizeFull();
-		h.setMargin(true);
-
+		// h.setMargin(true);
+		v.addComponent(h);
 		h.addComponent(upload);
-
 		audioInfoForm = new AudioInfoForm();
 		h.addComponent(audioInfoForm);
 
-		return h;
+		audioFileLink.setVisible(false);
+
+		return v;
 	}
 
 	private Component buildTab2() {
@@ -185,7 +233,28 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 				item.setComment(id3v1Tag.getComment());
 			}
 
+			
+			MediaItemContent content = item.getContent();
+			if(content == null)
+				content = new MediaItemContent();
+			
+			content.setContent(Files.readAllBytes(file.toPath()));
+			item.setContent(content);
+
 			audioInfoForm.refresh();
+
+			audioFileLink.setVisible(true);
+			audioFileLink.setResource(new FileResource(file));
+			audioFileLink.setCaption(file.getName());
+			audioFileLink.setTargetName("_blank");
+
+			String protocol = UI.getCurrent().getPage().getLocation().getScheme();
+			String currentUrl = UI.getCurrent().getPage().getLocation().getAuthority();
+
+			String mp3Url = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/"
+					+ audioFileLink.getUI().getUIId() + "/" + audioFileLink.getConnectorId() + "/href/"
+					+ file.getName();
+			System.out.println(mp3Url);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

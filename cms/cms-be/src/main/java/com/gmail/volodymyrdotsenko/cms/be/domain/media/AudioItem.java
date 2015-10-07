@@ -3,6 +3,8 @@ package com.gmail.volodymyrdotsenko.cms.be.domain.media;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 @Entity
 @Table(name = "MEDIA_ITEM_AUDIOS")
 // @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -10,7 +12,7 @@ public class AudioItem extends MediaItem {
 
 	private static final long serialVersionUID = 1L;
 
-	@NotNull
+	@NotBlank
 	@Column(name = "NAME", length = 255)
 	private String name;
 
