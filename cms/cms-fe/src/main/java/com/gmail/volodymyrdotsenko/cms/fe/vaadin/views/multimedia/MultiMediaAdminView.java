@@ -3,11 +3,17 @@ package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.vaadin.spring.sidebar.annotation.FontAwesomeIcon;
 import org.vaadin.spring.sidebar.annotation.SideBarItem;
 
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItem;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.Sections;
+import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.EmbeddedView;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -41,29 +47,54 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	private Link linkMp3;
 	private Resource resourceVtt;
 	private Resource resourceMp3;
-	
+
 	private final VerticalLayout mainContainer = new VerticalLayout();
 	private final VerticalLayout contentLayout = new VerticalLayout();
 	private final MultiMediaMenuBar menu = new MultiMediaMenuBar(this);
 	private final MediaLibraryTree mediaLibraryTree = new MediaLibraryTree();
+	private EmbeddedView currentEmbeddedView;
 
-	public MultiMediaAdminView() {
-		
+	private final FolderRepository folderRepo;
+	private final MadiaItemRepository mediaItemRepo;
+
+	@Autowired
+	public MultiMediaAdminView(FolderRepository folderRepo, MadiaItemRepository mediaItemRepo) {
+
 		HorizontalSplitPanel spliter = new HorizontalSplitPanel();
 		spliter.setSizeFull();
 		spliter.setSplitPosition(20, Unit.PERCENTAGE);
 
-		spliter.setFirstComponent(mediaLibraryTree	);
+		spliter.setFirstComponent(mediaLibraryTree);
 		spliter.setSecondComponent(contentLayout);
 
 		mainContainer.addComponent(menu);
 		mainContainer.addComponent(spliter);
-		
+
 		setCompositionRoot(mainContainer);
+
+		this.folderRepo = folderRepo;
+		this.mediaItemRepo = mediaItemRepo;
+	}
+
+	public void openView(Component component) {
+		if (currentEmbeddedView != null) {
+			currentEmbeddedView.close();
+			currentEmbeddedView = null;
+		}
+
+		contentLayout.addComponent(component);
+
+		if (component instanceof EmbeddedView) {
+			currentEmbeddedView = (EmbeddedView) component;
+		}
 	}
 	
-	public void openView(Component componet){
-		contentLayout.addComponent(componet);
+	public Folder getSlectedFolder(){
+		return folderRepo.getOne(1L);	
+	}
+
+	public void save(MediaItem audioItem) {
+		mediaItemRepo.save(audioItem);
 	}
 
 	public void MultiMediaAdminView() {
