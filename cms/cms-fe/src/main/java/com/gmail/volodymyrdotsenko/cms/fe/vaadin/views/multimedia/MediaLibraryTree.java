@@ -2,6 +2,10 @@ package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 
 import java.util.Collection;
 
+import org.springframework.context.ApplicationContext;
+
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -15,6 +19,7 @@ import com.vaadin.event.Action;
 import com.vaadin.ui.AbstractSelect;
 
 //https://dev.vaadin.com/svn/demo/sampler/src/com/vaadin/demo/sampler/features/
+//https://vaadin.com/forum/#!/thread/131803/131802
 public class MediaLibraryTree extends HorizontalLayout
 		implements Property.ValueChangeListener, Button.ClickListener, Action.Handler {
 
@@ -27,11 +32,19 @@ public class MediaLibraryTree extends HorizontalLayout
 
 	private final Tree tree;
 
+	private final ApplicationContext applicationContext;
+	private final FolderRepository folderRepo;
+
 	HorizontalLayout editBar;
 	private TextField editor;
 	private Button change;
 
-	public MediaLibraryTree() {
+	public MediaLibraryTree(ApplicationContext applicationContext, FolderRepository folderRepo) {
+
+		this.applicationContext = applicationContext;
+		this.folderRepo = applicationContext.getBean(FolderRepository.class);
+		System.out.println(folderRepo);
+
 		setSpacing(true);
 
 		// Create the Tree,a add to layout
@@ -39,7 +52,7 @@ public class MediaLibraryTree extends HorizontalLayout
 		addComponent(tree);
 
 		// Contents from a (prefilled example) hierarchical container:
-		tree.setContainerDataSource(getHardwareContainer());
+		tree.setContainerDataSource(buildContainer());
 
 		// Add Valuechangelistener and Actionhandler
 		tree.addValueChangeListener(this);
@@ -60,18 +73,18 @@ public class MediaLibraryTree extends HorizontalLayout
 		}
 
 		// Create the 'editor bar' (textfield and button in a horizontallayout)
-//		editBar = new HorizontalLayout();
-//		editBar.setMargin(true);
-//		editBar.setEnabled(false);
-//		addComponent(editBar);
-//		// textfield
-//		editor = new TextField("Item name");
-//		editor.setImmediate(true);
-//		editBar.addComponent(editor);
-//		// apply-button
-//		change = new Button("Apply", this);
-//		editBar.addComponent(change);
-//		editBar.setComponentAlignment(change, Alignment.BOTTOM_LEFT);
+		// editBar = new HorizontalLayout();
+		// editBar.setMargin(true);
+		// editBar.setEnabled(false);
+		// addComponent(editBar);
+		// // textfield
+		// editor = new TextField("Item name");
+		// editor.setImmediate(true);
+		// editBar.addComponent(editor);
+		// // apply-button
+		// change = new Button("Apply", this);
+		// editBar.addComponent(change);
+		// editBar.setComponentAlignment(change, Alignment.BOTTOM_LEFT);
 	}
 
 	@Override
@@ -127,54 +140,70 @@ public class MediaLibraryTree extends HorizontalLayout
 			// If something is selected from the tree, get its 'name' and
 			// insert it into the textfield
 			// editor.setValue(tree.getItem(event.getProperty().getValue()).getItemProperty("name"));
-			//editor.requestRepaint();
-			//editBar.setEnabled(true);
+			// editor.requestRepaint();
+			// editBar.setEnabled(true);
 		} else {
-			//editor.setValue("");
-			//editBar.setEnabled(false);
+			// editor.setValue("");
+			// editBar.setEnabled(false);
 		}
 	}
 
-	private static final String[][] hardware = { //
-			{ "Desktops", "Dell OptiPlex GX240", "Dell OptiPlex GX260", "Dell OptiPlex GX280" },
-			{ "Monitors", "Benq T190HD", "Benq T220HD", "Benq T240HD" },
-			{ "Laptops", "IBM ThinkPad T40", "IBM ThinkPad T43", "IBM ThinkPad T60" } };
-
-	public static HierarchicalContainer getHardwareContainer() {
-		Item item = null;
-		int itemId = 0; // Increasing numbering for itemId:s
-
-		// Create new container
+	private HierarchicalContainer buildContainer(){
+		
 		HierarchicalContainer hwContainer = new HierarchicalContainer();
-		// Create containerproperty for name
 		hwContainer.addContainerProperty("name", String.class, null);
-		// Create containerproperty for icon
-		// hwContainer.addContainerProperty(hw_PROPERTY_ICON,
-		// ThemeResource.class,
-		// new ThemeResource("../runo/icons/16/document.png"));
-		for (int i = 0; i < hardware.length; i++) {
-			// Add new item
-			item = hwContainer.addItem(itemId);
-			// Add name property for item
-			item.getItemProperty("name").setValue(hardware[i][0]);
-			// Allow children
-			hwContainer.setChildrenAllowed(itemId, true);
-			itemId++;
-			for (int j = 1; j < hardware[i].length; j++) {
-				// if (j == 1) {
-				// item.getItemProperty(hw_PROPERTY_ICON).setValue(
-				// new ThemeResource("../runo/icons/16/folder.png"));
-				// }
-				// Add child items
-				item = hwContainer.addItem(itemId);
-				item.getItemProperty("name").setValue(hardware[i][j]);
-				hwContainer.setParent(itemId, itemId - j);
-				hwContainer.setChildrenAllowed(itemId, false);
-
-				itemId++;
-			}
+		
+		//build root
+		Folder root = folderRepo.findRoot();
+		if(root != null){
+			Item item = hwContainer.addItem(root.getId());
+			//item.getItemProperty("name").setValue(root.getLocal()]);
 		}
 		return hwContainer;
 	}
+
+	// private static final String[][] hardware = { //
+	// { "Desktops", "Dell OptiPlex GX240", "Dell OptiPlex GX260", "Dell
+	// OptiPlex GX280" },
+	// { "Monitors", "Benq T190HD", "Benq T220HD", "Benq T240HD" },
+	// { "Laptops", "IBM ThinkPad T40", "IBM ThinkPad T43", "IBM ThinkPad T60" }
+	// };
+	//
+	// public static HierarchicalContainer getHardwareContainer() {
+	// Item item = null;
+	// int itemId = 0; // Increasing numbering for itemId:s
+	//
+	// // Create new container
+	// HierarchicalContainer hwContainer = new HierarchicalContainer();
+	// // Create containerproperty for name
+	// hwContainer.addContainerProperty("name", String.class, null);
+	// // Create containerproperty for icon
+	// // hwContainer.addContainerProperty(hw_PROPERTY_ICON,
+	// // ThemeResource.class,
+	// // new ThemeResource("../runo/icons/16/document.png"));
+	// for (int i = 0; i < hardware.length; i++) {
+	// // Add new item
+	// item = hwContainer.addItem(itemId);
+	// // Add name property for item
+	// item.getItemProperty("name").setValue(hardware[i][0]);
+	// // Allow children
+	// hwContainer.setChildrenAllowed(itemId, true);
+	// itemId++;
+	// for (int j = 1; j < hardware[i].length; j++) {
+	// // if (j == 1) {
+	// // item.getItemProperty(hw_PROPERTY_ICON).setValue(
+	// // new ThemeResource("../runo/icons/16/folder.png"));
+	// // }
+	// // Add child items
+	// item = hwContainer.addItem(itemId);
+	// item.getItemProperty("name").setValue(hardware[i][j]);
+	// hwContainer.setParent(itemId, itemId - j);
+	// hwContainer.setChildrenAllowed(itemId, false);
+	//
+	// itemId++;
+	// }
+	// }
+	// return hwContainer;
+	// }
 
 }

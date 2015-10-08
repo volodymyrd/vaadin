@@ -4,13 +4,13 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.annotation.Secured;
 import org.vaadin.spring.sidebar.annotation.FontAwesomeIcon;
 import org.vaadin.spring.sidebar.annotation.SideBarItem;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
-import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemContentRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItem;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.Sections;
@@ -54,20 +54,28 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	private final VerticalLayout mainContainer = new VerticalLayout();
 	private final VerticalLayout contentLayout = new VerticalLayout();
 	private final MultiMediaMenuBar menu = new MultiMediaMenuBar(this);
-	private final MediaLibraryTree mediaLibraryTree = new MediaLibraryTree();
+	private final MediaLibraryTree mediaLibraryTree;
 	private EmbeddedView currentEmbeddedView;
+
+	private final ApplicationContext applicationContext;
 
 	private final FolderRepository folderRepo;
 	private final MadiaItemRepository mediaItemRepo;
-	//private final MadiaItemContentRepository mediaItemContentRepo;
+	// private final MadiaItemContentRepository mediaItemContentRepo;
 
 	@Autowired
-	public MultiMediaAdminView(FolderRepository folderRepo, MadiaItemRepository mediaItemRepo) {
+	public MultiMediaAdminView(ApplicationContext applicationContext, FolderRepository folderRepo,
+			MadiaItemRepository mediaItemRepo) {
+
+		this.applicationContext = applicationContext;
+		this.folderRepo = folderRepo;
+		this.mediaItemRepo = mediaItemRepo;
 
 		HorizontalSplitPanel spliter = new HorizontalSplitPanel();
 		spliter.setSizeFull();
 		spliter.setSplitPosition(20, Unit.PERCENTAGE);
 
+		mediaLibraryTree = new MediaLibraryTree(applicationContext, folderRepo);
 		spliter.setFirstComponent(mediaLibraryTree);
 		spliter.setSecondComponent(contentLayout);
 
@@ -75,9 +83,6 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		mainContainer.addComponent(spliter);
 
 		setCompositionRoot(mainContainer);
-
-		this.folderRepo = folderRepo;
-		this.mediaItemRepo = mediaItemRepo;
 	}
 
 	public void openView(Component component) {
@@ -92,15 +97,15 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 			currentEmbeddedView = (EmbeddedView) component;
 		}
 	}
-	
-	public Folder getSlectedFolder(){
-		return folderRepo.getOne(1L);	
+
+	public Folder getSlectedFolder() {
+		return folderRepo.getOne(1L);
 	}
 
 	public void save(MediaItem audioItem) {
 		audioItem.getContent().getContent();
 		mediaItemRepo.save(audioItem);
-		
+
 		new Notification("Saved successful", Notification.Type.HUMANIZED_MESSAGE).show(Page.getCurrent());
 	}
 
