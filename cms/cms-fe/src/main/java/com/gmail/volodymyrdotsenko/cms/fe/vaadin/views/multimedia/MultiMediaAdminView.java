@@ -75,7 +75,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		spliter.setSizeFull();
 		spliter.setSplitPosition(20, Unit.PERCENTAGE);
 
-		mediaLibraryTree = new MediaLibraryTree(applicationContext, folderRepo);
+		mediaLibraryTree = new MediaLibraryTree(applicationContext);
 		spliter.setFirstComponent(mediaLibraryTree);
 		spliter.setSecondComponent(contentLayout);
 

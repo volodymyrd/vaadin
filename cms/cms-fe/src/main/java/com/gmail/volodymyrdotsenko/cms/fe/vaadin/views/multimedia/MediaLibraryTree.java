@@ -1,11 +1,14 @@
 package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.context.ApplicationContext;
 
-import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
+import com.gmail.volodymyrdotsenko.cms.be.domain.local.LanguageRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
+import com.gmail.volodymyrdotsenko.cms.be.dto.MapDto;
+import com.gmail.volodymyrdotsenko.cms.be.services.MultiMediaService;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -13,9 +16,12 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.Tree.ExpandEvent;
+import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.event.Action;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractSelect;
 
 //https://dev.vaadin.com/svn/demo/sampler/src/com/vaadin/demo/sampler/features/
@@ -31,19 +37,22 @@ public class MediaLibraryTree extends HorizontalLayout
 	private static final Action[] ACTIONS = new Action[] { ACTION_ADD, ACTION_DELETE };
 
 	private final Tree tree;
+	private final String lang;
 
-	private final ApplicationContext applicationContext;
+	private final LanguageRepository langRepo;
 	private final FolderRepository folderRepo;
+	private final MultiMediaService service;
 
 	HorizontalLayout editBar;
 	private TextField editor;
 	private Button change;
 
-	public MediaLibraryTree(ApplicationContext applicationContext, FolderRepository folderRepo) {
-
-		this.applicationContext = applicationContext;
+	public MediaLibraryTree(ApplicationContext applicationContext) {
+		this.service = applicationContext.getBean(MultiMediaService.class);
+		this.langRepo = applicationContext.getBean(LanguageRepository.class);
 		this.folderRepo = applicationContext.getBean(FolderRepository.class);
-		System.out.println(folderRepo);
+
+		lang = VaadinSession.getCurrent().getLocale().getLanguage();
 
 		setSpacing(true);
 
@@ -52,8 +61,8 @@ public class MediaLibraryTree extends HorizontalLayout
 		addComponent(tree);
 
 		// Contents from a (prefilled example) hierarchical container:
-		tree.setContainerDataSource(buildContainer());
-
+		//tree.setContainerDataSource(buildContainer());
+		buildContainer();
 		// Add Valuechangelistener and Actionhandler
 		tree.addValueChangeListener(this);
 
@@ -68,9 +77,9 @@ public class MediaLibraryTree extends HorizontalLayout
 		tree.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
 
 		// Expand whole tree
-		for (Object id : tree.rootItemIds()) {
-			tree.expandItemsRecursively(id);
-		}
+		// for (Object id : tree.rootItemIds()) {
+		// tree.expandItemsRecursively(id);
+		// }
 
 		// Create the 'editor bar' (textfield and button in a horizontallayout)
 		// editBar = new HorizontalLayout();
@@ -85,6 +94,25 @@ public class MediaLibraryTree extends HorizontalLayout
 		// change = new Button("Apply", this);
 		// editBar.addComponent(change);
 		// editBar.setComponentAlignment(change, Alignment.BOTTOM_LEFT);
+
+		tree.addExpandListener(new ExpandListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void nodeExpand(ExpandEvent event) {
+				System.out.println(event.getItemId());
+				List<MapDto<Long, String>> l = service.getFolderDto((Long) event.getItemId(), lang);
+				if (l != null) {
+					l.forEach(e -> {
+						Item item = tree.addItem(e.getKey());
+						System.out.println(item);
+						tree.setParent(item, event.getItemId());
+						item.getItemProperty("name").setValue(e.getValue());
+					});
+				}
+			}
+		});
 	}
 
 	@Override
@@ -148,16 +176,18 @@ public class MediaLibraryTree extends HorizontalLayout
 		}
 	}
 
-	private HierarchicalContainer buildContainer(){
-		
-		HierarchicalContainer hwContainer = new HierarchicalContainer();
-		hwContainer.addContainerProperty("name", String.class, null);
-		
-		//build root
-		Folder root = folderRepo.findRoot();
-		if(root != null){
-			Item item = hwContainer.addItem(root.getId());
-			//item.getItemProperty("name").setValue(root.getLocal()]);
+	private final HierarchicalContainer hwContainer = new HierarchicalContainer();
+
+	private HierarchicalContainer buildContainer() {
+		tree.addContainerProperty("name", String.class, null);
+
+		// build root
+		List<MapDto<Long, String>> root = service.getFolderDto(null, lang);
+
+		if (root != null && root.size() > 0) {
+			Item item = tree.addItem(root.get(0).getKey());
+			item.getItemProperty("name").setValue(root.get(0).getValue());
+			tree.setChildrenAllowed(root.get(0).getKey(), true);
 		}
 		return hwContainer;
 	}
