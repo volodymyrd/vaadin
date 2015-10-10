@@ -105,6 +105,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	public void save(MediaItem audioItem) {
 		audioItem.getContent().getContent();
 		mediaItemRepo.save(audioItem);
+		mediaLibraryTree.refreshNode(mediaLibraryTree.getSelectedFolderNodeKey());
 
 		new Notification("Saved successful", Notification.Type.HUMANIZED_MESSAGE).show(Page.getCurrent());
 	}

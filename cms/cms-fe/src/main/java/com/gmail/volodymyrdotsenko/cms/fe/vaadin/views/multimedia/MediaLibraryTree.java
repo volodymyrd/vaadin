@@ -21,6 +21,8 @@ import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.event.Action;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractSelect;
 
@@ -30,6 +32,9 @@ public class MediaLibraryTree extends HorizontalLayout
 		implements Property.ValueChangeListener, Button.ClickListener, Action.Handler {
 
 	private static final long serialVersionUID = 1L;
+	private static final String NODE_PROP_KEY = "key";
+	private static final String NODE_PROP_NAME = "name";
+	private static final String NODE_PROP_TYPE = "type";
 
 	// Actions for the context menu
 	private static final Action ACTION_ADD = new Action("Add child item");
@@ -47,6 +52,31 @@ public class MediaLibraryTree extends HorizontalLayout
 	private TextField editor;
 	private Button change;
 
+	private Item selectedItem;
+
+	public String getSelectedNodeKey() {
+		String key = (String) selectedItem.getItemProperty(NODE_PROP_KEY).getValue();
+
+		return key;
+	}
+
+	public String getSelectedFolderNodeKey() {
+		String key = (String) selectedItem.getItemProperty(NODE_PROP_TYPE).getValue()
+				+ selectedItem.getItemProperty(NODE_PROP_KEY).getValue();
+		if (key.startsWith("I")) {
+			key = (String) tree.getParent(key);
+		}
+		System.out.println(key);
+
+		return key;
+	}
+
+	public void refreshNode(String key) {
+		System.out.println("refresh tree");
+		tree.collapseItem(key);
+		tree.expandItem(key);
+	}
+
 	public MediaLibraryTree(ApplicationContext applicationContext) {
 		this.service = applicationContext.getBean(MultiMediaService.class);
 		this.langRepo = applicationContext.getBean(LanguageRepository.class);
@@ -61,8 +91,8 @@ public class MediaLibraryTree extends HorizontalLayout
 		addComponent(tree);
 
 		// Contents from a (prefilled example) hierarchical container:
-		//tree.setContainerDataSource(buildContainer());
-		buildContainer();
+		tree.setContainerDataSource(buildContainer());
+		// buildContainer();
 		// Add Valuechangelistener and Actionhandler
 		tree.addValueChangeListener(this);
 
@@ -95,23 +125,48 @@ public class MediaLibraryTree extends HorizontalLayout
 		// editBar.addComponent(change);
 		// editBar.setComponentAlignment(change, Alignment.BOTTOM_LEFT);
 
+		tree.addItemClickListener(new ItemClickListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				selectedItem = event.getItem();
+			}
+		});
+
 		tree.addExpandListener(new ExpandListener() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void nodeExpand(ExpandEvent event) {
-				System.out.println(event.getItemId());
-				List<MapDto<Long, String>> l = service.getFolderDto((Long) event.getItemId(), lang);
+				Item rootItem = tree.getItem(event.getItemId());
+				Property prop = rootItem.getItemProperty(NODE_PROP_KEY);
+				long rootItemId = (long) prop.getValue();
+				List<MapDto<Long, String>> l = service.getFolderDto(rootItemId, lang);
+				tree.setChildrenAllowed(rootItem, true);
+
 				if (l != null) {
 					l.forEach(e -> {
-						Item item = tree.addItem(e.getKey());
-						System.out.println(item);
-						tree.setParent(item, event.getItemId());
-						item.getItemProperty("name").setValue(e.getValue());
+						String k = "I" + e.getKey();
+						Item item = tree.addItem(k);
+						if (item != null) {
+							tree.setParent(k, event.getItemId());
+							tree.setChildrenAllowed(k, false);
+
+							Property prop1 = item.getItemProperty(NODE_PROP_TYPE);
+							prop1.setValue("I");
+							prop1 = item.getItemProperty(NODE_PROP_KEY);
+							prop1.setValue(e.getKey());
+							prop1 = item.getItemProperty(NODE_PROP_NAME);
+							prop1.setValue(e.getValue());
+						}
+
 					});
 				}
 			}
+
 		});
 	}
 
@@ -179,15 +234,22 @@ public class MediaLibraryTree extends HorizontalLayout
 	private final HierarchicalContainer hwContainer = new HierarchicalContainer();
 
 	private HierarchicalContainer buildContainer() {
-		tree.addContainerProperty("name", String.class, null);
+		hwContainer.addContainerProperty(NODE_PROP_KEY, Long.class, null);
+		hwContainer.addContainerProperty(NODE_PROP_NAME, String.class, null);
+		hwContainer.addContainerProperty(NODE_PROP_TYPE, String.class, null);
 
 		// build root
 		List<MapDto<Long, String>> root = service.getFolderDto(null, lang);
 
 		if (root != null && root.size() > 0) {
-			Item item = tree.addItem(root.get(0).getKey());
-			item.getItemProperty("name").setValue(root.get(0).getValue());
-			tree.setChildrenAllowed(root.get(0).getKey(), true);
+			String k = "R" + root.get(0).getKey();
+			Item item = hwContainer.addItem(k);
+			hwContainer.setChildrenAllowed(k, true);
+			item.getItemProperty(NODE_PROP_TYPE).setValue("R");
+			item.getItemProperty(NODE_PROP_KEY).setValue(root.get(0).getKey());
+			item.getItemProperty(NODE_PROP_NAME).setValue(root.get(0).getValue());
+			selectedItem = item;
+			tree.select(k);
 		}
 		return hwContainer;
 	}
