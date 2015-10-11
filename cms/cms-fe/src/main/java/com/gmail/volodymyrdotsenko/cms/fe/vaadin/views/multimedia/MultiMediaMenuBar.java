@@ -23,7 +23,7 @@ public class MultiMediaMenuBar extends VerticalLayout{
         final MenuBar.MenuItem newAdioItem = audio.addItem("New", new Command() {
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
-				mainView.openView(new AdioItemView(mainView));
+				mainView.openView(new AdioItemView(mainView, null));
 			}
         });
         

@@ -59,6 +59,10 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 
 	private final ApplicationContext applicationContext;
 
+	public ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
 	private final FolderRepository folderRepo;
 	private final MadiaItemRepository mediaItemRepo;
 	// private final MadiaItemContentRepository mediaItemContentRepo;
@@ -75,7 +79,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		spliter.setSizeFull();
 		spliter.setSplitPosition(20, Unit.PERCENTAGE);
 
-		mediaLibraryTree = new MediaLibraryTree(applicationContext);
+		mediaLibraryTree = new MediaLibraryTree(this, applicationContext);
 		spliter.setFirstComponent(mediaLibraryTree);
 		spliter.setSecondComponent(contentLayout);
 
@@ -99,7 +103,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	}
 
 	public Folder getSlectedFolder() {
-		return folderRepo.getOne(1L);
+		return folderRepo.getOne(mediaLibraryTree.getSelectedFolderNodeId());
 	}
 
 	public void save(MediaItem audioItem) {
@@ -179,11 +183,9 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 
 		String mp3Url = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/" + linkMp3.getUI().getUIId()
 				+ "/" + linkMp3.getConnectorId() + "/href/" + ((StreamResource) resourceMp3).getFilename();
-		System.out.println(mp3Url);
 
 		String vttUrl = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/" + linkVtt.getUI().getUIId()
 				+ "/" + linkVtt.getConnectorId() + "/href/" + ((StreamResource) resourceVtt).getFilename();
-		System.out.println(vttUrl);
 
 		CustomLayout sample = new CustomLayout();
 		vl.addComponent(sample);
@@ -218,17 +220,13 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		JavaScript.getCurrent().execute(js);
 
 		// Find the application directory
-		String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
-
-		System.out.println("basepath:" + basepath);
-
+		//String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 		// URL url =
 		// getClass().getResource("/scorpions_send_me_an_angel.txt.vtt");
 		// FileResource resource = new FileResource(new File(url.toURI()));
 		// // Resource r = new StreamResource();
 		// System.out.println("resource:" + resource);
 		// ExternalResource r = new ExternalResource(url);
-
 	}
 
 	@Override

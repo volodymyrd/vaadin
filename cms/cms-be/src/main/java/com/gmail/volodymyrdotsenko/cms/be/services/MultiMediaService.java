@@ -51,4 +51,12 @@ public class MultiMediaService {
 
 		return list;
 	}
+
+	@Transactional
+	public AudioItem getAudioItemWithContent(Long id) {
+		AudioItem item = audioItemRepo.findOne(id);
+		item.getContent().getContent();
+
+		return item;
+	}
 }

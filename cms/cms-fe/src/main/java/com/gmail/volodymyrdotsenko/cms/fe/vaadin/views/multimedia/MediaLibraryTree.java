@@ -11,15 +11,11 @@ import com.gmail.volodymyrdotsenko.cms.be.dto.MapDto;
 import com.gmail.volodymyrdotsenko.cms.be.services.MultiMediaService;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.Tree.ExpandListener;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.event.Action;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
@@ -28,8 +24,7 @@ import com.vaadin.ui.AbstractSelect;
 
 //https://dev.vaadin.com/svn/demo/sampler/src/com/vaadin/demo/sampler/features/
 //https://vaadin.com/forum/#!/thread/131803/131802
-public class MediaLibraryTree extends HorizontalLayout
-		implements Property.ValueChangeListener, Button.ClickListener, Action.Handler {
+public class MediaLibraryTree extends HorizontalLayout implements Action.Handler {
 
 	private static final long serialVersionUID = 1L;
 	private static final String NODE_PROP_KEY = "key";
@@ -44,13 +39,10 @@ public class MediaLibraryTree extends HorizontalLayout
 	private final Tree tree;
 	private final String lang;
 
+	private final MultiMediaAdminView adminView;
 	private final LanguageRepository langRepo;
 	private final FolderRepository folderRepo;
 	private final MultiMediaService service;
-
-	HorizontalLayout editBar;
-	private TextField editor;
-	private Button change;
 
 	private Item selectedItem;
 
@@ -66,18 +58,27 @@ public class MediaLibraryTree extends HorizontalLayout
 		if (key.startsWith("I")) {
 			key = (String) tree.getParent(key);
 		}
-		System.out.println(key);
 
 		return key;
 	}
 
+	public Long getSelectedFolderNodeId() {
+		String key = (String) selectedItem.getItemProperty(NODE_PROP_TYPE).getValue()
+				+ selectedItem.getItemProperty(NODE_PROP_KEY).getValue();
+		if (key.startsWith("I")) {
+			key = (String) tree.getParent(key);
+		}
+
+		return (Long) selectedItem.getItemProperty(NODE_PROP_KEY).getValue();
+	}
+
 	public void refreshNode(String key) {
-		System.out.println("refresh tree");
 		tree.collapseItem(key);
 		tree.expandItem(key);
 	}
 
-	public MediaLibraryTree(ApplicationContext applicationContext) {
+	public MediaLibraryTree(MultiMediaAdminView adminView, ApplicationContext applicationContext) {
+		this.adminView = adminView;
 		this.service = applicationContext.getBean(MultiMediaService.class);
 		this.langRepo = applicationContext.getBean(LanguageRepository.class);
 		this.folderRepo = applicationContext.getBean(FolderRepository.class);
@@ -87,14 +88,14 @@ public class MediaLibraryTree extends HorizontalLayout
 		setSpacing(true);
 
 		// Create the Tree,a add to layout
-		tree = new Tree("Media Library");
+		tree = new Tree();
 		addComponent(tree);
 
 		// Contents from a (prefilled example) hierarchical container:
 		tree.setContainerDataSource(buildContainer());
 		// buildContainer();
 		// Add Valuechangelistener and Actionhandler
-		tree.addValueChangeListener(this);
+		// tree.addValueChangeListener(this);
 
 		// Add actions (context menu)
 		tree.addActionHandler(this);
@@ -132,6 +133,13 @@ public class MediaLibraryTree extends HorizontalLayout
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				selectedItem = event.getItem();
+				if (event.isDoubleClick()) {
+					String t = (String) selectedItem.getItemProperty(NODE_PROP_TYPE).getValue();
+
+					if (t.equals("I"))
+						adminView.openView(new AdioItemView(adminView,
+								(Long) selectedItem.getItemProperty(NODE_PROP_KEY).getValue()));
+				}
 			}
 		});
 
@@ -206,30 +214,30 @@ public class MediaLibraryTree extends HorizontalLayout
 		}
 	}
 
-	@Override
-	public void buttonClick(ClickEvent event) {
-		// If the edited value contains something, set it to be the item's new
-		// 'name' property
-		if (!editor.getValue().equals("")) {
-			Item item = tree.getItem(tree.getValue());
-			Property name = item.getItemProperty("name");
-			name.setValue(editor.getValue());
-		}
-	}
+	// public void buttonClick(ClickEvent event) {
+	// // If the edited value contains something, set it to be the item's new
+	// // 'name' property
+	// if (!editor.getValue().equals("")) {
+	// Item item = tree.getItem(tree.getValue());
+	// Property name = item.getItemProperty("name");
+	// name.setValue(editor.getValue());
+	// }
+	// }
 
-	@Override
-	public void valueChange(ValueChangeEvent event) {
-		if (event.getProperty().getValue() != null) {
-			// If something is selected from the tree, get its 'name' and
-			// insert it into the textfield
-			// editor.setValue(tree.getItem(event.getProperty().getValue()).getItemProperty("name"));
-			// editor.requestRepaint();
-			// editBar.setEnabled(true);
-		} else {
-			// editor.setValue("");
-			// editBar.setEnabled(false);
-		}
-	}
+	// @Override
+	// public void valueChange(ValueChangeEvent event) {
+	// if (event.getProperty().getValue() != null) {
+	// // If something is selected from the tree, get its 'name' and
+	// // insert it into the textfield
+	// //
+	// editor.setValue(tree.getItem(event.getProperty().getValue()).getItemProperty("name"));
+	// // editor.requestRepaint();
+	// // editBar.setEnabled(true);
+	// } else {
+	// // editor.setValue("");
+	// // editBar.setEnabled(false);
+	// }
+	// }
 
 	private final HierarchicalContainer hwContainer = new HierarchicalContainer();
 
@@ -247,7 +255,7 @@ public class MediaLibraryTree extends HorizontalLayout
 			hwContainer.setChildrenAllowed(k, true);
 			item.getItemProperty(NODE_PROP_TYPE).setValue("R");
 			item.getItemProperty(NODE_PROP_KEY).setValue(root.get(0).getKey());
-			item.getItemProperty(NODE_PROP_NAME).setValue(root.get(0).getValue());
+			item.getItemProperty(NODE_PROP_NAME).setValue("Media Library");
 			selectedItem = item;
 			tree.select(k);
 		}

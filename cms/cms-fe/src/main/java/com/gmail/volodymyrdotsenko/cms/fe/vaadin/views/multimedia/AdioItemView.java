@@ -12,6 +12,7 @@ import org.vaadin.viritin.layouts.MFormLayout;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItem;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItemContent;
+import com.gmail.volodymyrdotsenko.cms.be.services.MultiMediaService;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.EmbeddedView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView.SuccessHandler;
@@ -25,7 +26,9 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
@@ -81,7 +84,6 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 		@Override
 		protected Component createContent() {
-
 			HorizontalLayout vl = new HorizontalLayout(
 					new MFormLayout(name, lengthView, track, artist, title)
 							.withMargin(new MarginInfo(false, false, false, true)),
@@ -92,20 +94,60 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		}
 	}
 
-	public AdioItemView(MultiMediaAdminView mainView) {
+	public AdioItemView(MultiMediaAdminView mainView, Long adioItemId) {
 		this.mainView = mainView;
 
-		item = new AudioItem();
-		item.setFolder(mainView.getSlectedFolder());
+		if (adioItemId == null) {
+			item = new AudioItem();
+			item.setFolder(mainView.getSlectedFolder());
+		} else {
+			MultiMediaService service = mainView.getApplicationContext().getBean(MultiMediaService.class);
+
+			item = service.getAudioItemWithContent(adioItemId);
+		}
 
 		setSizeFull();
 
 		addComponent(buildTop());
 		addComponent(buildTab());
 		addComponent(buildBottom());
+
+		if (adioItemId != null) {
+			buildAudioLink();
+		}
 	}
 
 	private Component buildTop() {
+		if (item.getContent() == null)
+			return topLayot;
+
+		String protocol = UI.getCurrent().getPage().getLocation().getScheme();
+		String currentUrl = UI.getCurrent().getPage().getLocation().getAuthority();
+
+		String mp3Url = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/"
+				+ audioFileLink.getUI().getUIId() + "/" + audioFileLink.getConnectorId() + "/href/" + item.getName();
+
+		String vttUrl = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/"
+				+ audioFileLink.getUI().getUIId() + "/" + audioFileLink.getConnectorId() + "/href/" + item.getName();
+
+		CustomLayout cl = new CustomLayout();
+		topLayot.addComponent(cl);
+
+		String js = ""// "//<![CDATA[ "
+				+ " var lyrics = document.getElementById('lyrics'); "
+				+ " var audio = document.getElementById('audio'); " + " var track = document.getElementById('trk'); "
+				+ " var timeUp = document.getElementById('timeUp'); " + " var textTrack = track.track; "
+				+ " track.addEventListener('cuechange', cueChange, false); "
+				+ " audio.addEventListener('timeupdate', timeUpdate, false); "
+				+ " function cueChange(){ var cues = textTrack.activeCues; if (cues.length > 0){ lyrics.innerHTML = cues[0].text;}} "
+				+ " function timeUpdate(){ timeUp.innerHTML=audio.currentTime;} ";
+		// + " //]]>";
+
+		cl.setTemplateContents("<audio id='audio' preload='auto' controls> " + " <source src='" + mp3Url
+				+ "' type='audio/mpeg'>" + " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl
+				+ "' default  /></audio>" + " <br/><div id='lyrics'></div><br/><div id='timeUp'></div><br/>");
+
+		JavaScript.getCurrent().execute(js);
 
 		return topLayot;
 	}
@@ -147,22 +189,9 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
+
+						buildAudioLink();
 					}
-
-					audioFileLink.setVisible(true);
-					audioFileLink.setResource(new StreamResource(new StreamSource() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public InputStream getStream() {
-							return new ByteArrayInputStream(item.getContent().getContent());
-						}
-
-					}, item.getName() + ".mp3"));
-
-					audioFileLink.setCaption(item.getName());
-					audioFileLink.setTargetName("_blank");
 
 				} else
 					new Notification("There are a few errors exist", Notification.Type.ERROR_MESSAGE)
@@ -181,6 +210,23 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		});
 
 		return bottomLayot;
+	}
+
+	void buildAudioLink() {
+		audioFileLink.setVisible(true);
+		audioFileLink.setResource(new StreamResource(new StreamSource() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public InputStream getStream() {
+				return new ByteArrayInputStream(item.getContent().getContent());
+			}
+
+		}, item.getName() + ".mp3"));
+
+		audioFileLink.setCaption(item.getName());
+		audioFileLink.setTargetName("_blank");
 	}
 
 	private Component buildTab() {
@@ -233,11 +279,10 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 				item.setComment(id3v1Tag.getComment());
 			}
 
-			
 			MediaItemContent content = item.getContent();
-			if(content == null)
+			if (content == null)
 				content = new MediaItemContent();
-			
+
 			content.setContent(Files.readAllBytes(file.toPath()));
 			item.setContent(content);
 
@@ -248,13 +293,16 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 			audioFileLink.setCaption(file.getName());
 			audioFileLink.setTargetName("_blank");
 
-			String protocol = UI.getCurrent().getPage().getLocation().getScheme();
-			String currentUrl = UI.getCurrent().getPage().getLocation().getAuthority();
+			// String protocol =
+			// UI.getCurrent().getPage().getLocation().getScheme();
+			// String currentUrl =
+			// UI.getCurrent().getPage().getLocation().getAuthority();
 
-			String mp3Url = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/"
-					+ audioFileLink.getUI().getUIId() + "/" + audioFileLink.getConnectorId() + "/href/"
-					+ file.getName();
-			System.out.println(mp3Url);
+			// String mp3Url = protocol + "://" + currentUrl +
+			// "/vaadinServlet/APP/connector/"
+			// + audioFileLink.getUI().getUIId() + "/" +
+			// audioFileLink.getConnectorId() + "/href/"
+			// + file.getName();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

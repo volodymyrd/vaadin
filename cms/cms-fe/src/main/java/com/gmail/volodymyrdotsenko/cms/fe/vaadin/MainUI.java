@@ -26,7 +26,7 @@ import org.vaadin.spring.sidebar.security.VaadinSecurityItemFilter;
  * Main application UI that allows the user to navigate between views, and log
  * out.
  */
-@SpringUI
+@SpringUI(path = "/cms")
 @Theme(ValoTheme.THEME_NAME)
 public class MainUI extends UI {
 

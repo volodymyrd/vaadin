@@ -7,4 +7,5 @@
     <logger name="org.hibernate.tool" level="DEBUG"/>
     <logger name="org.hibernate.sql" level="DEBUG"/>
     <logger name="org.vaadin.spring.i18n" level="DEBUG"/>
+<!--     <logger name="org.springframework.web" level="DEBUG"/> -->
 </configuration>

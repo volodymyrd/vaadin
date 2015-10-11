@@ -10,6 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>cms-fe</artifactId>
+	<packaging>war</packaging>
 
 	<name>CMS FE</name>
 
@@ -73,6 +74,16 @@
 			<groupId>org.vaadin.teemu</groupId>
 			<artifactId>switch</artifactId>
 			<version>2.0.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
 		</dependency>
 
 		<dependency>

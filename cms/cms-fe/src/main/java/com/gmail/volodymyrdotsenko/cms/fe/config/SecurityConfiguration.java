@@ -46,11 +46,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable(); // Use Vaadin's built-in CSRF protection instead
-		http.authorizeRequests().antMatchers("/login/**").anonymous().antMatchers("/vaadinServlet/UIDL/**").permitAll()
-				.antMatchers("/vaadinServlet/HEARTBEAT/**").permitAll().anyRequest().authenticated();
+		http.authorizeRequests()
+			.antMatchers("/").permitAll()
+			.antMatchers("/login/**").permitAll()
+			.antMatchers("/vaadinServlet/UIDL/**").permitAll()
+			.antMatchers("/vaadinServlet/HEARTBEAT/**").permitAll()
+			.antMatchers("/cms/**").authenticated()
+			.antMatchers("/admin/**").authenticated()
+			//.anyRequest().authenticated()
+			;
 		http.httpBasic().disable();
 		http.formLogin().disable();
-		http.logout().logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll();
+		http.logout().logoutUrl("/logout").logoutSuccessUrl("/").permitAll();
 		http.exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
 		http.rememberMe().rememberMeServices(rememberMeServices()).key("myAppKey");
 	}
@@ -75,9 +82,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return services;
 	}
 
-	@Bean(name = VaadinSharedSecurityConfiguration.VAADIN_AUTHENTICATION_SUCCESS_HANDLER_BEAN)
-	VaadinAuthenticationSuccessHandler vaadinAuthenticationSuccessHandler(HttpService httpService,
-			VaadinRedirectStrategy vaadinRedirectStrategy) {
-		return new VaadinUrlAuthenticationSuccessHandler(httpService, vaadinRedirectStrategy, "/");
-	}
+//	@Bean(name = VaadinSharedSecurityConfiguration.VAADIN_AUTHENTICATION_SUCCESS_HANDLER_BEAN)
+//	VaadinAuthenticationSuccessHandler vaadinAuthenticationSuccessHandler(HttpService httpService,
+//			VaadinRedirectStrategy vaadinRedirectStrategy) {
+//		return new VaadinUrlAuthenticationSuccessHandler(httpService, vaadinRedirectStrategy, "/");
+//	}
 }
