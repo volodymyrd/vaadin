@@ -1,9 +1,15 @@
 package com.gmail.volodymyrdotsenko.cms.be.domain.media;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
+
+import com.gmail.volodymyrdotsenko.cms.be.domain.local.Language;
 
 @Entity
 @Table(name = "MEDIA_ITEM_AUDIOS")
@@ -51,6 +57,12 @@ public class AudioItem extends MediaItem {
 
 	@Column(name = "FILE_LENGTH")
 	private Long fileLength;
+
+	@ElementCollection
+	@CollectionTable(name = "MEDIA_ITEM_TEXTS", joinColumns = {
+			@javax.persistence.JoinColumn(name = "REF_ITEM_ID", referencedColumnName = "ID") })
+	@MapKeyJoinColumn(name = "CODE")
+	private Map<Language, TextItem> textItem = new HashMap<>();
 
 	public String getName() {
 		return name;
@@ -154,6 +166,14 @@ public class AudioItem extends MediaItem {
 
 	public void setFileLength(Long fileLength) {
 		this.fileLength = fileLength;
+	}
+
+	public Map<Language, TextItem> getTextItem() {
+		return textItem;
+	}
+
+	public void setTextItem(Map<Language, TextItem> textItem) {
+		this.textItem = textItem;
 	}
 
 	@Override
