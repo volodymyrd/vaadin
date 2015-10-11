@@ -118,8 +118,15 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	}
 
 	private Component buildTop() {
-		if (item.getContent() == null)
-			return topLayot;
+		if (item.getContent() != null)
+			refreshTop(new CustomLayout());
+
+		return topLayot;
+	}
+
+	private void refreshTop(CustomLayout topCl) {
+
+		topLayot.addComponent(topCl);
 
 		String protocol = UI.getCurrent().getPage().getLocation().getScheme();
 		String currentUrl = UI.getCurrent().getPage().getLocation().getAuthority();
@@ -127,8 +134,6 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		String mp3Url = protocol + "://" + currentUrl + "/content/" + item.getId();
 
 		String vttUrl = "";
-		CustomLayout cl = new CustomLayout();
-		topLayot.addComponent(cl);
 
 		String js = ""// "//<![CDATA[ "
 				+ " var lyrics = document.getElementById('lyrics'); "
@@ -140,13 +145,12 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 				+ " function timeUpdate(){ timeUp.innerHTML=audio.currentTime;} ";
 		// + " //]]>";
 
-		cl.setTemplateContents("<audio id='audio' preload='auto' controls> " + " <source src='" + mp3Url
+		topCl.setTemplateContents("<div style='margin-left: 10%'><audio id='audio' controls> " + " <source src='" + mp3Url
 				+ "' type='audio/mpeg'>" + " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl
-				+ "' default  /></audio>" + " <br/><div id='lyrics'></div><br/><div id='timeUp'></div><br/>");
+				+ "' default  /></audio>" + " <br/><div id='lyrics'></div><br/><div id='timeUp'></div></div><br/>");
 
 		JavaScript.getCurrent().execute(js);
 
-		return topLayot;
 	}
 
 	private Component buildBottom() {
@@ -188,6 +192,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 							}
 
 						buildAudioLink();
+						refreshTop(new CustomLayout());
 					}
 
 				} else
@@ -267,7 +272,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 			item.setFileName(fileName);
 			item.setFileLength(fileLength);
 			item.setMIMEType(MIMEType);
-			
+
 			if (mp3file.hasId3v1Tag()) {
 				ID3v1 id3v1Tag = mp3file.getId3v1Tag();
 				item.setTrack(id3v1Tag.getTrack());
