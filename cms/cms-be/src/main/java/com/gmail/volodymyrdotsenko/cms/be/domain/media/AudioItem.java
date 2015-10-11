@@ -43,6 +43,15 @@ public class AudioItem extends MediaItem {
 	@Column(name = "COMMENT", length = 255)
 	private String comment;
 
+	@Column(name = "FILE_NAME", length = 255)
+	private String fileName;
+
+	@Column(name = "MIME_TYPE", length = 255)
+	private String MIMEType;
+
+	@Column(name = "FILE_LENGTH")
+	private Long fileLength;
+
 	public String getName() {
 		return name;
 	}
@@ -121,6 +130,30 @@ public class AudioItem extends MediaItem {
 
 	public void setGenreDescription(String genreDescription) {
 		this.genreDescription = genreDescription;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public String getMIMEType() {
+		return MIMEType;
+	}
+
+	public void setMIMEType(String mIMEType) {
+		MIMEType = mIMEType;
+	}
+
+	public Long getFileLength() {
+		return fileLength;
+	}
+
+	public void setFileLength(Long fileLength) {
+		this.fileLength = fileLength;
 	}
 
 	@Override

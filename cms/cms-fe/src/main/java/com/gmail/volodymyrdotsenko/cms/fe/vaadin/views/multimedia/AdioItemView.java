@@ -124,12 +124,9 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		String protocol = UI.getCurrent().getPage().getLocation().getScheme();
 		String currentUrl = UI.getCurrent().getPage().getLocation().getAuthority();
 
-		String mp3Url = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/"
-				+ audioFileLink.getUI().getUIId() + "/" + audioFileLink.getConnectorId() + "/href/" + item.getName();
+		String mp3Url = protocol + "://" + currentUrl + "/content/" + item.getId();
 
-		String vttUrl = protocol + "://" + currentUrl + "/vaadinServlet/APP/connector/"
-				+ audioFileLink.getUI().getUIId() + "/" + audioFileLink.getConnectorId() + "/href/" + item.getName();
-
+		String vttUrl = "";
 		CustomLayout cl = new CustomLayout();
 		topLayot.addComponent(cl);
 
@@ -262,11 +259,15 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	}
 
 	@Override
-	public void fireLoadingSuccessEvent(File file) {
+	public void fireLoadingSuccessEvent(String fileName, String MIMEType, long fileLength, File file) {
 		try {
 			Mp3File mp3file = new Mp3File(file);
 
 			item.setLength(mp3file.getLengthInSeconds());
+			item.setFileName(fileName);
+			item.setFileLength(fileLength);
+			item.setMIMEType(MIMEType);
+			
 			if (mp3file.hasId3v1Tag()) {
 				ID3v1 id3v1Tag = mp3file.getId3v1Tag();
 				item.setTrack(id3v1Tag.getTrack());

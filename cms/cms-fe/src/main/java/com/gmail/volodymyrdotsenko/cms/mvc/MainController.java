@@ -31,7 +31,7 @@ public class MainController {
 
 	@Autowired
 	private MultiMediaService mmService;
-	
+
 	@Value("${application.message:Hello World}")
 	private String message = "Hello World";
 
@@ -40,30 +40,31 @@ public class MainController {
 		model.put("time", new Date());
 		model.put("message", this.message);
 		return "welcome";
-		//return "redirect:/cms";
+		// return "redirect:/cms";
 	}
 
 	@RequestMapping("/admin")
-	//@ResponseBody
+	// @ResponseBody
 	public String admin(Map<String, Object> model) {
 		model.put("time", new Date());
 		model.put("message", this.message);
 		return "admin";
-		//return "redirect:/cms";
+		// return "redirect:/cms";
 	}
 
 	@RequestMapping(value = "/content/{id}", method = RequestMethod.GET)
 	public String content(@PathVariable("id") long id, HttpServletResponse response) {
 
 		System.out.println(mmService);
-		
+
 		AudioItem item = mmService.getAudioItemWithContent(id);
 
 		try {
-			response.setHeader("Content-Disposition", "inline;filename=\"" + item.getName() + ".mp3\"");
+			response.setHeader("Content-Disposition", "inline;filename=\"" + item.getFileName());
 
 			OutputStream out = response.getOutputStream();
-			response.setContentType("Content-Type: audio/mpeg");
+			response.setContentLength(item.getFileLength().intValue());
+			response.setContentType("Content-Type: " + item.getMIMEType());
 
 			IOUtils.copy(new ByteArrayInputStream(item.getContent().getContent()), out);
 			out.flush();

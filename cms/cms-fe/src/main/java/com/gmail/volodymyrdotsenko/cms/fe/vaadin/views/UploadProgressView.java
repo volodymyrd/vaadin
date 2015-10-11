@@ -189,7 +189,9 @@ public class UploadProgressView extends VerticalLayout {
 		@Override
 		public void uploadSucceeded(final SucceededEvent event) {
 			new Notification("File loaded successful ", Notification.Type.HUMANIZED_MESSAGE).show(Page.getCurrent());
-			sh.fireLoadingSuccessEvent(((ReceiverImpl) receiver).getFile());
+			event.getMIMEType();
+			sh.fireLoadingSuccessEvent(event.getFilename(), event.getMIMEType(), event.getLength(),
+					((ReceiverImpl) receiver).getFile());
 		}
 
 		@Override
@@ -235,7 +237,7 @@ public class UploadProgressView extends VerticalLayout {
 	}
 
 	public interface SuccessHandler {
-		void fireLoadingSuccessEvent(File file);
+		void fireLoadingSuccessEvent(String fileName, String MIMEType, long fileLength, File file);
 	}
 
 	private static boolean isEmpty(String s) {
