@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.form.AbstractForm;
@@ -25,13 +27,16 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -256,11 +261,36 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 		return v;
 	}
-
+	
 	private Component buildTab2() {
-		HorizontalLayout h = new HorizontalLayout();
+		VerticalLayout v = new VerticalLayout();
+		v.setMargin(new MarginInfo(true, true, false, true));
+		v.setSizeFull();
+		
+		ComboBox lang = new ComboBox("Language", mainView.getLangSet());
+		lang.setNullSelectionAllowed(false);
+		v.addComponent(lang);
 
-		return h;
+		HorizontalLayout h = new HorizontalLayout();
+		h.setMargin(new MarginInfo(true, false, false, false));
+		v.addComponent(h);
+		h.setSizeFull();
+		
+		TextArea text = new TextArea("Text");
+		text.setHeight(200, Unit.PIXELS);
+		text.setWidth("100%");
+		//text.setSizeFull();
+		h.addComponent(text);
+		
+		Button addSubTitle = new Button(">>"); 
+		h.addComponent(addSubTitle);
+		h.setComponentAlignment(addSubTitle, Alignment.MIDDLE_CENTER);
+		
+		ListSelect select = new ListSelect("Subtitle");
+		select.setWidth("100%");
+		h.addComponent(select);
+		
+		return v;
 	}
 
 	@Override

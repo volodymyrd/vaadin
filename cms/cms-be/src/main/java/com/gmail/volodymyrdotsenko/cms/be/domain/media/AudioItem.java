@@ -2,10 +2,8 @@ package com.gmail.volodymyrdotsenko.cms.be.domain.media;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
 

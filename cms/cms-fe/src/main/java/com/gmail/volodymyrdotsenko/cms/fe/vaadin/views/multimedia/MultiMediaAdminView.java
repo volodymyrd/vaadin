@@ -2,6 +2,8 @@ package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -9,6 +11,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.vaadin.spring.sidebar.annotation.FontAwesomeIcon;
 import org.vaadin.spring.sidebar.annotation.SideBarItem;
 
+import com.gmail.volodymyrdotsenko.cms.be.domain.local.LanguageRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemRepository;
@@ -22,7 +25,6 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
@@ -51,6 +53,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 	private Resource resourceVtt;
 	private Resource resourceMp3;
 
+	private final Set<String> langSet = new HashSet<>();
 	private final VerticalLayout mainContainer = new VerticalLayout();
 	private final VerticalLayout contentLayout = new VerticalLayout();
 	private final MultiMediaMenuBar menu = new MultiMediaMenuBar(this);
@@ -63,17 +66,26 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		return applicationContext;
 	}
 
+	public Set<String> getLangSet() {
+		return langSet;
+	}
+
 	private final FolderRepository folderRepo;
 	private final MadiaItemRepository mediaItemRepo;
+	private final LanguageRepository langRepo;
 	// private final MadiaItemContentRepository mediaItemContentRepo;
 
 	@Autowired
-	public MultiMediaAdminView(ApplicationContext applicationContext, FolderRepository folderRepo,
-			MadiaItemRepository mediaItemRepo) {
+	public MultiMediaAdminView(ApplicationContext applicationContext) {
 
 		this.applicationContext = applicationContext;
-		this.folderRepo = folderRepo;
-		this.mediaItemRepo = mediaItemRepo;
+		this.folderRepo = applicationContext.getBean(FolderRepository.class);
+		this.mediaItemRepo = applicationContext.getBean(MadiaItemRepository.class);
+		this.langRepo = applicationContext.getBean(LanguageRepository.class);
+
+		langRepo.findAll().forEach(e -> {
+			langSet.add(e.getCode());
+		});
 
 		HorizontalSplitPanel spliter = new HorizontalSplitPanel();
 		spliter.setSizeFull();
@@ -220,7 +232,8 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		JavaScript.getCurrent().execute(js);
 
 		// Find the application directory
-		//String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+		// String basepath =
+		// VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 		// URL url =
 		// getClass().getResource("/scorpions_send_me_an_angel.txt.vtt");
 		// FileResource resource = new FileResource(new File(url.toURI()));
