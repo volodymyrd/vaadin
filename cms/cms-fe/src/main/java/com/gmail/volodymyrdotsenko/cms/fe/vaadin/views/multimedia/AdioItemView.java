@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.form.AbstractForm;
@@ -20,6 +18,8 @@ import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView.SuccessHandler;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.Mp3File;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
@@ -30,14 +30,15 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Link;
-import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
@@ -150,8 +151,8 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 				+ " function timeUpdate(){ timeUp.innerHTML=audio.currentTime;} ";
 		// + " //]]>";
 
-		topCl.setTemplateContents("<div style='margin-left: 10%'><audio id='audio' controls> " + " <source src='" + mp3Url
-				+ "' type='audio/mpeg'>" + " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl
+		topCl.setTemplateContents("<div style='margin-left: 10%'><audio id='audio' controls> " + " <source src='"
+				+ mp3Url + "' type='audio/mpeg'>" + " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl
 				+ "' default  /></audio>" + " <br/><div id='lyrics'></div><br/><div id='timeUp'></div></div><br/>");
 
 		JavaScript.getCurrent().execute(js);
@@ -160,7 +161,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 	private Component buildBottom() {
 		bottomLayot.setSizeFull();
-		bottomLayot.setMargin(true);
+		//bottomLayot.setMargin(true);
 
 		HorizontalLayout h = new HorizontalLayout();
 		h.setMargin(true);
@@ -184,7 +185,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				if (audioInfoForm.isValid()) {
+				if (audioInfoForm.isValid() && lang.isValid()) {
 					mainView.save(item);
 
 					if (audioFileLink.getResource() instanceof FileResource) {
@@ -261,35 +262,58 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 		return v;
 	}
+
+	private ComboBox lang;
 	
 	private Component buildTab2() {
 		VerticalLayout v = new VerticalLayout();
 		v.setMargin(new MarginInfo(true, true, false, true));
 		v.setSizeFull();
-		
-		ComboBox lang = new ComboBox("Language", mainView.getLangSet());
+
+		lang = new ComboBox("Language", mainView.getLangSet());
 		lang.setNullSelectionAllowed(false);
+		lang.setRequired(true);
 		v.addComponent(lang);
 
-		HorizontalLayout h = new HorizontalLayout();
+		GridLayout h = new GridLayout();
+		h.setRows(1);
+        h.setColumns(2);
+        h.setColumnExpandRatio(0, 1);
+        h.setColumnExpandRatio(1, 2);
 		h.setMargin(new MarginInfo(true, false, false, false));
 		v.addComponent(h);
 		h.setSizeFull();
-		
+
 		TextArea text = new TextArea("Text");
-		text.setHeight(200, Unit.PIXELS);
-		text.setWidth("100%");
+		text.setHeight(250, Unit.PIXELS);
+		text.setWidth("95%");
 		//text.setSizeFull();
 		h.addComponent(text);
-		
-		Button addSubTitle = new Button(">>"); 
-		h.addComponent(addSubTitle);
-		h.setComponentAlignment(addSubTitle, Alignment.MIDDLE_CENTER);
-		
-		ListSelect select = new ListSelect("Subtitle");
-		select.setWidth("100%");
+
+		final TwinColSelect select = new TwinColSelect();
+		//select.setWidth("100%");
+		select.setSizeFull();
 		h.addComponent(select);
-		
+		select.setRows(10);
+		select.setNullSelectionAllowed(true);
+		select.setMultiSelect(false);
+		select.setImmediate(true);
+		select.setLeftColumnCaption("Presubtitle");
+		select.setRightColumnCaption("Subtitle");
+
+		text.addTextChangeListener(new TextChangeListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void textChange(TextChangeEvent event) {
+				select.removeAllItems();
+				String[] txt = event.getText().split("[\\n\\r]+");
+				for (String s : txt)
+					select.addItem(s.trim());
+			}
+		});
+
 		return v;
 	}
 
