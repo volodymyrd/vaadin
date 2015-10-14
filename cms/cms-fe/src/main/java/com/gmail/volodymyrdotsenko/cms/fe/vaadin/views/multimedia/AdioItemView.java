@@ -40,6 +40,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
@@ -49,6 +50,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
@@ -329,6 +331,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		h1.addComponent(h2);
 		h1.setSizeFull();
 		h1.setComponentAlignment(h2, Alignment.MIDDLE_RIGHT);
+		h1.setMargin(new MarginInfo(false, false, true, false));
 		h2.setSizeFull();
 		// start.setWidth("50%");
 		h2.addComponent(start);
@@ -348,23 +351,24 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 			}
 		});
 
-		GridLayout h = new GridLayout();
-		h.setRows(1);
-		h.setColumns(2);
-		h.setColumnExpandRatio(0, 1);
-		h.setColumnExpandRatio(1, 2);
-		h.setMargin(new MarginInfo(true, false, false, false));
-		v.addComponent(h);
+		//GridLayout h = new GridLayout();
+		HorizontalSplitPanel h = new HorizontalSplitPanel();
 		h.setSizeFull();
+		//h.setRows(1);
+		//h.setColumns(2);
+		//h.setColumnExpandRatio(0, 1);
+		//h.setColumnExpandRatio(1, 2);
+		//h.setMargin(new MarginInfo(true, false, false, false));
+		v.addComponent(h);
 
 		text.setHeight(250, Unit.PIXELS);
 		text.setWidth("95%");
-		// text.setSizeFull();
+		//text.setSizeFull();
 		h.addComponent(text);
 
-		// select.setWidth("100%");
-		select.setSizeFull();
-		h.addComponent(select);
+		select.setWidth("95%");
+		//select.setSizeFull();
+		//h.addComponent(select);
 		select.setRows(10);
 		select.setNullSelectionAllowed(true);
 		select.setMultiSelect(false);
