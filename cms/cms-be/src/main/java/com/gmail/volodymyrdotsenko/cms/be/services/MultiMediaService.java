@@ -2,6 +2,7 @@ package com.gmail.volodymyrdotsenko.cms.be.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItem;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItemRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.TextItem;
 import com.gmail.volodymyrdotsenko.cms.be.dto.MapDto;
 
 @Service
@@ -56,6 +58,9 @@ public class MultiMediaService {
 	public AudioItem getAudioItemWithContent(Long id) {
 		AudioItem item = audioItemRepo.findOne(id);
 		item.getContent().getContent();
+		
+		for (Map.Entry<Language, TextItem> e : item.getTextItem().entrySet()) {
+		}
 
 		return item;
 	}

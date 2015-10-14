@@ -57,7 +57,7 @@ public class AudioItem extends MediaItem {
 	private Long fileLength;
 
 	@ElementCollection
-	@CollectionTable(name = "MEDIA_ITEM_TEXTS", joinColumns = {
+	@CollectionTable(name = "MEDIA_ITEM_AUDIO_TEXTS", joinColumns = {
 			@javax.persistence.JoinColumn(name = "REF_ITEM_ID", referencedColumnName = "ID") })
 	@MapKeyJoinColumn(name = "CODE")
 	private Map<Language, TextItem> textItem = new HashMap<>();

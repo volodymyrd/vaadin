@@ -19,22 +19,8 @@ public abstract class MediaItem extends BaseEntity {
 	@JoinColumn(name = "REF_FOLDER_ID")
 	protected Folder folder;
 
-	@ElementCollection
-	@CollectionTable(name = "MEDIA_ITEMS_LOCAL", joinColumns = {
-			@javax.persistence.JoinColumn(name = "REF_ITEM_ID", referencedColumnName = "ID") })
-	@MapKeyJoinColumn(name = "CODE")
-	private Map<Language, MediaItemLocal> local = new HashMap<>();
-
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private MediaItemContent content;
-
-	public Map<Language, MediaItemLocal> getLocal() {
-		return local;
-	}
-
-	public void setLocal(Map<Language, MediaItemLocal> local) {
-		this.local = local;
-	}
 
 	public Folder getFolder() {
 		return folder;

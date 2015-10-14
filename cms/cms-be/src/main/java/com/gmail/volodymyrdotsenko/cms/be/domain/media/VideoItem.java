@@ -28,7 +28,7 @@ public class VideoItem extends MediaItem {
 	private Long length;
 
 	@ElementCollection
-	@CollectionTable(name = "MEDIA_ITEM_TEXTS", joinColumns = {
+	@CollectionTable(name = "MEDIA_ITEM_VIDEO_TEXTS", joinColumns = {
 			@javax.persistence.JoinColumn(name = "REF_ITEM_ID", referencedColumnName = "ID") })
 	@MapKeyJoinColumn(name = "CODE")
 	private Map<Language, TextItem> textItem = new HashMap<>();

@@ -5,19 +5,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.form.AbstractForm;
 import org.vaadin.viritin.layouts.MFormLayout;
 
+import com.gmail.volodymyrdotsenko.cms.be.domain.local.Language;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItem;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItemContent;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.TextItem;
 import com.gmail.volodymyrdotsenko.cms.be.services.MultiMediaService;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.EmbeddedView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView.SuccessHandler;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.Mp3File;
+import com.vaadin.data.Container.PropertySetChangeEvent;
+import com.vaadin.data.Container.PropertySetChangeListener;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FileResource;
@@ -103,6 +111,8 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	public AdioItemView(MultiMediaAdminView mainView, Long adioItemId) {
 		this.mainView = mainView;
 
+		lang = new ComboBox("Language", mainView.getLangSet());
+
 		if (adioItemId == null) {
 			item = new AudioItem();
 			item.setFolder(mainView.getSlectedFolder());
@@ -110,6 +120,13 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 			MultiMediaService service = mainView.getApplicationContext().getBean(MultiMediaService.class);
 
 			item = service.getAudioItemWithContent(adioItemId);
+			Map<Language, TextItem> texts = item.getTextItem();
+			for (Map.Entry<Language, TextItem> e : texts.entrySet()) {
+				lang.select(e.getKey().getCode());
+				text.setValue(e.getValue().getText());
+
+				break;
+			}
 		}
 
 		setSizeFull();
@@ -132,6 +149,8 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 	private void refreshTop(CustomLayout topCl) {
 
+		topLayot.setSizeFull();
+		topLayot.setHeight(40, Unit.PIXELS);
 		topLayot.addComponent(topCl);
 
 		String protocol = UI.getCurrent().getPage().getLocation().getScheme();
@@ -151,17 +170,37 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 				+ " function timeUpdate(){ timeUp.innerHTML=audio.currentTime;} ";
 		// + " //]]>";
 
-		topCl.setTemplateContents("<div style='margin-left: 10%'><audio id='audio' controls> " + " <source src='"
-				+ mp3Url + "' type='audio/mpeg'>" + " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl
-				+ "' default  /></audio>" + " <br/><div id='lyrics'></div><br/><div id='timeUp'></div></div><br/>");
+		topCl.setTemplateContents("<div style='margin: 5px 10px 0px 10%; width: 100%;'>"
+				+ "<audio id='audio' controls> " 
+				+ " <source src='" + mp3Url + "' type='audio/mpeg'>" 
+				+ " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl + "' default  /></audio>"
+				+ "<div id='timeUp' style='width:20%;float: right'></div><div id='lyrics' style='width:30%;float: right'></div></div>");
 
 		JavaScript.getCurrent().execute(js);
 
+		TextField trackPosChanger = new TextField("0.000");
+		trackPosChanger.addTextChangeListener(new TextChangeListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void textChange(TextChangeEvent event) {
+				try {
+					double v = Double.valueOf(event.getText());
+					String js1 = " var audio = document.getElementById('audio'); " + " audio.currentTime=" + v + ";";
+					JavaScript.getCurrent().execute(js1);
+				} catch (NumberFormatException ex) {
+
+				}
+			}
+		});
+
+		// topLayot.addComponent(trackPosChanger);
 	}
 
 	private Component buildBottom() {
 		bottomLayot.setSizeFull();
-		//bottomLayot.setMargin(true);
+		// bottomLayot.setMargin(true);
 
 		HorizontalLayout h = new HorizontalLayout();
 		h.setMargin(true);
@@ -185,7 +224,15 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				if (audioInfoForm.isValid() && lang.isValid()) {
+				if (audioInfoForm.isValid() && lang.isValid() && item != null && item.getContent() != null) {
+
+					Map<Language, TextItem> textItem = new HashMap<>();
+
+					textItem.put(mainView.getLangRepo().findOne((String) lang.getValue()),
+							new TextItem(text.getValue()));
+
+					item.setTextItem(textItem);
+
 					mainView.save(item);
 
 					if (audioFileLink.getResource() instanceof FileResource) {
@@ -263,35 +310,59 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		return v;
 	}
 
-	private ComboBox lang;
-	
+	private final ComboBox lang;
+	private final TextArea text = new TextArea("Text");
+	private final TwinColSelect select = new TwinColSelect();
+	private final TimeLabelTextField start = new TimeLabelTextField("Start");
+	private final TimeLabelTextField end = new TimeLabelTextField("End");
+
 	private Component buildTab2() {
 		VerticalLayout v = new VerticalLayout();
+		HorizontalLayout h1 = new HorizontalLayout();
+		HorizontalLayout h2 = new HorizontalLayout();
 		v.setMargin(new MarginInfo(true, true, false, true));
 		v.setSizeFull();
 
-		lang = new ComboBox("Language", mainView.getLangSet());
 		lang.setNullSelectionAllowed(false);
 		lang.setRequired(true);
-		v.addComponent(lang);
+		h1.addComponent(lang);
+		h1.addComponent(h2);
+		h1.setSizeFull();
+		h1.setComponentAlignment(h2, Alignment.MIDDLE_RIGHT);
+		h2.setSizeFull();
+		// start.setWidth("50%");
+		h2.addComponent(start);
+		h2.setComponentAlignment(start, Alignment.MIDDLE_RIGHT);
+		// end.setWidth("50%");
+		h2.addComponent(end);
+		h2.setComponentAlignment(end, Alignment.MIDDLE_RIGHT);
+		v.addComponent(h1);
+
+		lang.addValueChangeListener(new ValueChangeListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				System.out.println("select lang " + event.getProperty().getValue());
+			}
+		});
 
 		GridLayout h = new GridLayout();
 		h.setRows(1);
-        h.setColumns(2);
-        h.setColumnExpandRatio(0, 1);
-        h.setColumnExpandRatio(1, 2);
+		h.setColumns(2);
+		h.setColumnExpandRatio(0, 1);
+		h.setColumnExpandRatio(1, 2);
 		h.setMargin(new MarginInfo(true, false, false, false));
 		v.addComponent(h);
 		h.setSizeFull();
 
-		TextArea text = new TextArea("Text");
 		text.setHeight(250, Unit.PIXELS);
 		text.setWidth("95%");
-		//text.setSizeFull();
+		// text.setSizeFull();
 		h.addComponent(text);
 
-		final TwinColSelect select = new TwinColSelect();
-		//select.setWidth("100%");
+		// select.setWidth("100%");
 		select.setSizeFull();
 		h.addComponent(select);
 		select.setRows(10);
@@ -300,6 +371,10 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		select.setImmediate(true);
 		select.setLeftColumnCaption("Presubtitle");
 		select.setRightColumnCaption("Subtitle");
+		
+		if (text.getValue() != null && !text.getValue().isEmpty()) {
+			updateSelect(text.getValue());
+		}
 
 		text.addTextChangeListener(new TextChangeListener() {
 
@@ -307,14 +382,18 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 			@Override
 			public void textChange(TextChangeEvent event) {
-				select.removeAllItems();
-				String[] txt = event.getText().split("[\\n\\r]+");
-				for (String s : txt)
-					select.addItem(s.trim());
+				updateSelect(event.getText());
 			}
 		});
 
 		return v;
+	}
+
+	private void updateSelect(String text) {
+		select.removeAllItems();
+		String[] txt = text.split("[\\n\\r]+");
+		for (String s : txt)
+			select.addItem(s.trim());
 	}
 
 	@Override

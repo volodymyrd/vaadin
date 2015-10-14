@@ -16,6 +16,7 @@ import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItem;
+import com.gmail.volodymyrdotsenko.cms.be.services.MultiMediaService;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.Sections;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.EmbeddedView;
 import com.vaadin.navigator.View;
@@ -70,10 +71,27 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		return langSet;
 	}
 
+	public FolderRepository getFolderRepo() {
+		return folderRepo;
+	}
+
+	public MadiaItemRepository getMediaItemRepo() {
+		return mediaItemRepo;
+	}
+
+	public LanguageRepository getLangRepo() {
+		return langRepo;
+	}
+
+	public MultiMediaService getService() {
+		return service;
+	}
+
 	private final FolderRepository folderRepo;
 	private final MadiaItemRepository mediaItemRepo;
 	private final LanguageRepository langRepo;
 	// private final MadiaItemContentRepository mediaItemContentRepo;
+	private final MultiMediaService service;
 
 	@Autowired
 	public MultiMediaAdminView(ApplicationContext applicationContext) {
@@ -82,6 +100,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		this.folderRepo = applicationContext.getBean(FolderRepository.class);
 		this.mediaItemRepo = applicationContext.getBean(MadiaItemRepository.class);
 		this.langRepo = applicationContext.getBean(LanguageRepository.class);
+		this.service = applicationContext.getBean(MultiMediaService.class);
 
 		langRepo.findAll().forEach(e -> {
 			langSet.add(e.getCode());

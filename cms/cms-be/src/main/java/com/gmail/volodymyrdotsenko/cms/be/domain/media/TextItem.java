@@ -11,6 +11,13 @@ public class TextItem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public TextItem() {
+	}
+
+	public TextItem(String text) {
+		this.text = text;
+	}
+
 	@Lob
 	@Column(name = "text")
 	private String text;
