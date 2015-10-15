@@ -1,13 +1,9 @@
 package com.gmail.volodymyrdotsenko.cms.be.domain.media;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.BaseEntity;
-import com.gmail.volodymyrdotsenko.cms.be.domain.local.Language;
 
 @MappedSuperclass
 public abstract class MediaItem extends BaseEntity {
@@ -21,6 +17,10 @@ public abstract class MediaItem extends BaseEntity {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private MediaItemContent content;
+
+	@Lob
+	@Column(name = "subtitle")
+	private String subtitle;
 
 	public Folder getFolder() {
 		return folder;
@@ -36,5 +36,13 @@ public abstract class MediaItem extends BaseEntity {
 
 	public void setContent(MediaItemContent content) {
 		this.content = content;
+	}
+
+	public String getSubtitle() {
+		return subtitle;
+	}
+
+	public void setSubtitle(String subtitle) {
+		this.subtitle = subtitle;
 	}
 }

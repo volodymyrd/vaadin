@@ -22,8 +22,6 @@ import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView.SuccessHandler;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.Mp3File;
-import com.vaadin.data.Container.PropertySetChangeEvent;
-import com.vaadin.data.Container.PropertySetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
@@ -38,22 +36,25 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.JavaScript;
+import com.vaadin.ui.JavaScriptFunction;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
+
+import elemental.json.JsonArray;
 
 public class AdioItemView extends VerticalLayout implements EmbeddedView, SuccessHandler {
 
@@ -68,7 +69,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	private AudioInfoForm audioInfoForm;
 	private final Link audioFileLink = new Link();
 
-	private final AudioItem item;
+	private AudioItem item;
 
 	private class AudioInfoForm extends AbstractForm<AudioItem> {
 		private static final long serialVersionUID = 1L;
@@ -149,6 +150,8 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		return topLayot;
 	}
 
+	private double timeTrack;
+
 	private void refreshTop(CustomLayout topCl) {
 
 		topLayot.setSizeFull();
@@ -162,42 +165,49 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 		String vttUrl = "";
 
+		// String timeUpId = UUID.randomUUID().toString();
+
 		String js = ""// "//<![CDATA[ "
 				+ " var lyrics = document.getElementById('lyrics'); "
 				+ " var audio = document.getElementById('audio'); " + " var track = document.getElementById('trk'); "
-				+ " var timeUp = document.getElementById('timeUp'); " + " var textTrack = track.track; "
-				+ " track.addEventListener('cuechange', cueChange, false); "
+				// + " var timeUp = document.getElementById('timeUp'); "
+				// + " var timeUp = document.getElementById('" + timeUpId + "');
+				// "
+				+ " var textTrack = track.track; " + " track.addEventListener('cuechange', cueChange, false); "
 				+ " audio.addEventListener('timeupdate', timeUpdate, false); "
 				+ " function cueChange(){ var cues = textTrack.activeCues; if (cues.length > 0){ lyrics.innerHTML = cues[0].text;}} "
-				+ " function timeUpdate(){ timeUp.innerHTML=audio.currentTime;} ";
+				+ " function timeUpdate(){ /*timeUp.innerHTML=audio.currentTime;*/ com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia.timeUpdate(audio.currentTime);} ";
 		// + " //]]>";
 
-		topCl.setTemplateContents("<div style='margin: 5px 10px 0px 10%; width: 100%;'>"
-				+ "<audio id='audio' controls> " 
-				+ " <source src='" + mp3Url + "' type='audio/mpeg'>" 
+		topCl.setTemplateContents("<div style='margin: 10px 10px 0px 10%; width: 100%;'>"
+				+ "<audio id='audio' controls> " + " <source src='" + mp3Url + "' type='audio/mpeg'>"
 				+ " <track id='trk' kind='subtitles' srclang='en' src='" + vttUrl + "' default  /></audio>"
 				+ "<div id='timeUp' style='width:20%;float: right'></div><div id='lyrics' style='width:30%;float: right'></div></div>");
 
+		// timeTrack = new CustomLayout();
+		// timeTrack.setId(timeUpId);
+		// TextField trackPosChanger = new TextField();
+		// trackPosChanger.setId(timeUpId);
+		// trackPosChanger.addTextChangeListener(new TextChangeListener() {
+		//
+		// private static final long serialVersionUID = 1L;
+		//
+		// @Override
+		// public void textChange(TextChangeEvent event) {
+		// try {
+		// double v = Double.valueOf(event.getText());
+		// String js1 = " var audio = document.getElementById('audio'); " + "
+		// audio.currentTime=" + v + ";";
+		// JavaScript.getCurrent().execute(js1);
+		// } catch (NumberFormatException ex) {
+		//
+		// }
+		// }
+		// });
+
+		// topLayot.addComponent(timeTrack);
+
 		JavaScript.getCurrent().execute(js);
-
-		TextField trackPosChanger = new TextField("0.000");
-		trackPosChanger.addTextChangeListener(new TextChangeListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void textChange(TextChangeEvent event) {
-				try {
-					double v = Double.valueOf(event.getText());
-					String js1 = " var audio = document.getElementById('audio'); " + " audio.currentTime=" + v + ";";
-					JavaScript.getCurrent().execute(js1);
-				} catch (NumberFormatException ex) {
-
-				}
-			}
-		});
-
-		// topLayot.addComponent(trackPosChanger);
 	}
 
 	private Component buildBottom() {
@@ -235,7 +245,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 					item.setTextItem(textItem);
 
-					mainView.save(item);
+					item = (AudioItem) mainView.save(item);
 
 					if (audioFileLink.getResource() instanceof FileResource) {
 						File f = ((FileResource) audioFileLink.getResource()).getSourceFile();
@@ -315,6 +325,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	private final ComboBox lang;
 	private final TextArea text = new TextArea("Text");
 	private final TwinColSelect select = new TwinColSelect();
+	private final ListSelect select1 = new ListSelect();
 	private final TimeLabelTextField start = new TimeLabelTextField("Start");
 	private final TimeLabelTextField end = new TimeLabelTextField("End");
 
@@ -351,31 +362,40 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 			}
 		});
 
-		//GridLayout h = new GridLayout();
+		// GridLayout h = new GridLayout();
 		HorizontalSplitPanel h = new HorizontalSplitPanel();
 		h.setSizeFull();
-		//h.setRows(1);
-		//h.setColumns(2);
-		//h.setColumnExpandRatio(0, 1);
-		//h.setColumnExpandRatio(1, 2);
-		//h.setMargin(new MarginInfo(true, false, false, false));
+		h.setHeight(300, Unit.PIXELS);
+		;
+		h.setSplitPosition(35, Unit.PERCENTAGE);
+		// h.setRows(1);
+		// h.setColumns(2);
+		// h.setColumnExpandRatio(0, 1);
+		// h.setColumnExpandRatio(1, 2);
+		// h.setMargin(new MarginInfo(true, false, false, false));
 		v.addComponent(h);
 
-		text.setHeight(250, Unit.PIXELS);
-		text.setWidth("95%");
-		//text.setSizeFull();
-		h.addComponent(text);
+		// text.setHeight(350, Unit.PIXELS);
+		text.setSizeFull();
+		HorizontalLayout h31 = new HorizontalLayout();
+		h31.setSizeFull();
+		h31.setMargin(new MarginInfo(false, true, false, false));
+		h.addComponent(h31);
+		h31.addComponent(text);
 
-		select.setWidth("95%");
-		//select.setSizeFull();
-		//h.addComponent(select);
+		select.setSizeFull();
+		HorizontalLayout h32 = new HorizontalLayout();
+		h32.setSizeFull();
+		h32.setMargin(new MarginInfo(false, false, false, true));
+		h32.addComponent(select);
+		h.addComponent(h32);
 		select.setRows(10);
 		select.setNullSelectionAllowed(true);
-		select.setMultiSelect(false);
+		select.setMultiSelect(true);
 		select.setImmediate(true);
 		select.setLeftColumnCaption("Presubtitle");
 		select.setRightColumnCaption("Subtitle");
-		
+
 		if (text.getValue() != null && !text.getValue().isEmpty()) {
 			updateSelect(text.getValue());
 		}
@@ -388,6 +408,47 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 			public void textChange(TextChangeEvent event) {
 				updateSelect(event.getText());
 			}
+		});
+
+		JavaScript.getCurrent().addFunction("com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia.timeUpdate",
+				new JavaScriptFunction() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public void call(JsonArray arguments) {
+						System.out.println(arguments.asString());
+						timeTrack = arguments.asNumber();
+					}
+				});
+
+		select1.addValueChangeListener(new ValueChangeListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+
+			}
+		});
+
+		select.addValueChangeListener(new ValueChangeListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				/// System.out.println(event.getProperty().getValue());
+				// timeTrack.markAsDirty();
+				// System.out.println(timeTrack.getData());
+
+				// String js1 = " var audio = document.getElementById('audio');
+				// console.log(audio.currentTime);";
+				// JavaScript.getCurrent().execute(js1);
+				Notification.show("Value changed:", String.valueOf(event.getProperty().getValue()),
+						Type.TRAY_NOTIFICATION);
+			}
+
 		});
 
 		return v;
