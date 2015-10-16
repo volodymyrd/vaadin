@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,9 +25,8 @@ import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.Mp3File;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.FontIcon;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
@@ -36,20 +36,20 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.JavaScriptFunction;
 import com.vaadin.ui.Link;
-import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
@@ -113,6 +113,9 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 	public AdioItemView(MultiMediaAdminView mainView, Long adioItemId) {
 		this.mainView = mainView;
+
+		tabs.addStyleName(ValoTheme.TABSHEET_FRAMED);
+		tabs.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
 
 		lang = new ComboBox("Language", mainView.getLangSet());
 
@@ -324,33 +327,20 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 	private final ComboBox lang;
 	private final TextArea text = new TextArea("Text");
-	private final TwinColSelect select = new TwinColSelect();
-	private final ListSelect select1 = new ListSelect();
-	private final TimeLabelTextField start = new TimeLabelTextField("Start");
-	private final TimeLabelTextField end = new TimeLabelTextField("End");
+	private final Table table = new Table();
 
 	private Component buildTab2() {
+		HorizontalSplitPanel h = new HorizontalSplitPanel();
+		h.setSizeFull();
+		h.setSplitPosition(35, Unit.PERCENTAGE);
 		VerticalLayout v = new VerticalLayout();
-		HorizontalLayout h1 = new HorizontalLayout();
-		HorizontalLayout h2 = new HorizontalLayout();
-		v.setMargin(new MarginInfo(true, true, false, true));
 		v.setSizeFull();
+		v.setMargin(new MarginInfo(false, true, true, true));
+		h.addComponent(v);
 
 		lang.setNullSelectionAllowed(false);
 		lang.setRequired(true);
-		h1.addComponent(lang);
-		h1.addComponent(h2);
-		h1.setSizeFull();
-		h1.setComponentAlignment(h2, Alignment.MIDDLE_RIGHT);
-		h1.setMargin(new MarginInfo(false, false, true, false));
-		h2.setSizeFull();
-		// start.setWidth("50%");
-		h2.addComponent(start);
-		h2.setComponentAlignment(start, Alignment.MIDDLE_RIGHT);
-		// end.setWidth("50%");
-		h2.addComponent(end);
-		h2.setComponentAlignment(end, Alignment.MIDDLE_RIGHT);
-		v.addComponent(h1);
+		v.addComponent(lang);
 
 		lang.addValueChangeListener(new ValueChangeListener() {
 
@@ -362,53 +352,35 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 			}
 		});
 
-		// GridLayout h = new GridLayout();
-		HorizontalSplitPanel h = new HorizontalSplitPanel();
-		h.setSizeFull();
-		h.setHeight(300, Unit.PIXELS);
-		;
-		h.setSplitPosition(35, Unit.PERCENTAGE);
-		// h.setRows(1);
-		// h.setColumns(2);
-		// h.setColumnExpandRatio(0, 1);
-		// h.setColumnExpandRatio(1, 2);
-		// h.setMargin(new MarginInfo(true, false, false, false));
-		v.addComponent(h);
-
-		// text.setHeight(350, Unit.PIXELS);
 		text.setSizeFull();
-		HorizontalLayout h31 = new HorizontalLayout();
-		h31.setSizeFull();
-		h31.setMargin(new MarginInfo(false, true, false, false));
-		h.addComponent(h31);
-		h31.addComponent(text);
-
-		select.setSizeFull();
-		HorizontalLayout h32 = new HorizontalLayout();
-		h32.setSizeFull();
-		h32.setMargin(new MarginInfo(false, false, false, true));
-		h32.addComponent(select);
-		h.addComponent(h32);
-		select.setRows(10);
-		select.setNullSelectionAllowed(true);
-		select.setMultiSelect(true);
-		select.setImmediate(true);
-		select.setLeftColumnCaption("Presubtitle");
-		select.setRightColumnCaption("Subtitle");
-
-		if (text.getValue() != null && !text.getValue().isEmpty()) {
-			updateSelect(text.getValue());
-		}
-
-		text.addTextChangeListener(new TextChangeListener() {
+		text.setHeight(250, Unit.PIXELS);
+		v.addComponent(text);
+		Button addText = new Button("Add");
+		addText.addClickListener(new ClickListener() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public void textChange(TextChangeEvent event) {
-				updateSelect(event.getText());
+			public void buttonClick(ClickEvent event) {
+				String v = text.getValue();
+				String[] s = v.split("[\\n\\r]+");
+				System.out.println(Arrays.toString(s));
+				for (int i = 0; i < s.length; i++) {
+					Object obj[] = { s[i], new Button("take time") };
+					table.addItem(obj, i);
+				}
 			}
 		});
+		v.addComponent(addText);
+
+		// text.addTextChangeListener(new TextChangeListener() {
+		//
+		// private static final long serialVersionUID = 1L;
+		//
+		// @Override
+		// public void textChange(TextChangeEvent event) {
+		// }
+		// });
 
 		JavaScript.getCurrent().addFunction("com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia.timeUpdate",
 				new JavaScriptFunction() {
@@ -422,43 +394,19 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 					}
 				});
 
-		select1.addValueChangeListener(new ValueChangeListener() {
+		VerticalLayout v1 = new VerticalLayout();
+		v1.setSizeFull();
+		v1.setMargin(true);
+		h.addComponent(v1);
+		table.setSizeFull();
+		table.setSelectable(true);
+		table.setHeight(300, Unit.PIXELS);
+		table.addContainerProperty("Name", String.class, null);
+		table.addContainerProperty("Tools", Button.class, null);
 
-			private static final long serialVersionUID = 1L;
+		v1.addComponent(table);
 
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-
-			}
-		});
-
-		select.addValueChangeListener(new ValueChangeListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				/// System.out.println(event.getProperty().getValue());
-				// timeTrack.markAsDirty();
-				// System.out.println(timeTrack.getData());
-
-				// String js1 = " var audio = document.getElementById('audio');
-				// console.log(audio.currentTime);";
-				// JavaScript.getCurrent().execute(js1);
-				Notification.show("Value changed:", String.valueOf(event.getProperty().getValue()),
-						Type.TRAY_NOTIFICATION);
-			}
-
-		});
-
-		return v;
-	}
-
-	private void updateSelect(String text) {
-		select.removeAllItems();
-		String[] txt = text.split("[\\n\\r]+");
-		for (String s : txt)
-			select.addItem(s.trim());
+		return h;
 	}
 
 	@Override
