@@ -80,8 +80,6 @@ public class MainController {
 			sb.append(Utils.dateToVtt(e.getStart()) + " --> " + Utils.dateToVtt(e.getEnd()) + "\n");
 			sb.append(e.getText() + "\n\n");
 		});
-		
-		System.out.println("st\n" + sb.toString());
 
 		byte[] content = sb.toString().getBytes();
 		buildFileResponce(response, "st" + id + ".vtt", content.length, "", content);

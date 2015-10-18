@@ -173,6 +173,8 @@
 					<include>*.md</include>
 					<include>*.vtt</include>
 					<include>*.mp3</include>
+					<include>WEB-INF/**/*</include>
+					<include>VAADIN/**/*</include>
 				</includes>
 			</resource>
 		</resources>

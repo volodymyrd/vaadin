@@ -28,6 +28,7 @@ import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.UploadProgressView.SuccessHandler;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.Mp3File;
+import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -43,6 +44,8 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
+import com.vaadin.ui.DefaultFieldFactory;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.JavaScript;
@@ -73,6 +76,13 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 	private final UploadProgressView upload = new UploadProgressView(this);
 	private AudioInfoForm audioInfoForm;
 	private final Link audioFileLink = new Link();
+
+	private final static String containerPropertyNum = "num";
+	private final static String containerPropertyLang = "lang";
+	private final static String containerPropertyText = "text";
+	private final static String containerPropertyStart = "start";
+	private final static String containerPropertyEnd = "end";
+	private final static String containerPropertyTools = "tools";
 
 	private AudioItem item;
 
@@ -258,12 +268,14 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 					List<AudioSubtitle> subtitles = new ArrayList<>(table.getItemIds().size());
 					table.getItemIds().forEach(e -> {
 						Item i = table.getItem(e);
-						Language l = mainView.getLangRepo().findOne((String) i.getItemProperty("Lang").getValue());
-						AudioSubtitle as = new AudioSubtitle(l, item, (Integer) i.getItemProperty("Num").getValue());
+						Language l = mainView.getLangRepo()
+								.findOne((String) i.getItemProperty(containerPropertyLang).getValue());
+						AudioSubtitle as = new AudioSubtitle(l, item,
+								(Integer) i.getItemProperty(containerPropertyNum).getValue());
 
-						as.setEnd(Utils.vttToDate((String) i.getItemProperty("End").getValue()));
-						as.setStart(Utils.vttToDate((String) i.getItemProperty("Start").getValue()));
-						as.setText((String) i.getItemProperty("Text").getValue());
+						as.setEnd(Utils.vttToDate((String) i.getItemProperty(containerPropertyEnd).getValue()));
+						as.setStart(Utils.vttToDate((String) i.getItemProperty(containerPropertyStart).getValue()));
+						as.setText((String) i.getItemProperty(containerPropertyText).getValue());
 
 						subtitles.add(as);
 					});
@@ -416,10 +428,8 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 				Set<Object> deletedIds = new HashSet<>();
 				table.getItemIds().forEach(e -> {
-					if (lang.getValue().equals(table.getItem(e).getItemProperty("Lang").getValue())) {
+					if (lang.getValue().equals(table.getItem(e).getItemProperty(containerPropertyLang).getValue())) {
 						deletedIds.add(e);
-						// subtitles.remove(new AudioSubtitle(l, item, (Integer)
-						// e));
 					}
 				});
 				deletedIds.forEach(e -> table.removeItem(e));
@@ -459,7 +469,6 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 					@Override
 					public void call(JsonArray arguments) {
-						System.out.println(arguments.asString());
 						timeTrack = arguments.asNumber();
 					}
 				});
@@ -471,16 +480,34 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		table.setSizeFull();
 		table.setSelectable(true);
 		table.setHeight(300, Unit.PIXELS);
-		table.addContainerProperty("Num", Integer.class, null);
-		table.addContainerProperty("Lang", String.class, null);
-		table.addContainerProperty("Text", String.class, null);
-		table.addContainerProperty("Start", String.class, null);
-		table.addContainerProperty("End", String.class, null);
-		table.addContainerProperty("Tools", Button.class, null);
+		table.addContainerProperty(containerPropertyNum, Integer.class, null);
+		table.addContainerProperty(containerPropertyLang, String.class, null);
+		table.addContainerProperty(containerPropertyText, String.class, null);
+		table.addContainerProperty(containerPropertyStart, String.class, null);
+		table.addContainerProperty(containerPropertyEnd, String.class, null);
+		table.addContainerProperty(containerPropertyTools, Button.class, null);
 
-		table.setColumnWidth("Num", 50);
-		table.setColumnWidth("Lang", 50);
-		table.setColumnWidth("Text", 250);
+		table.setStyleName("table");
+		table.setColumnHeader(containerPropertyNum, "N");
+		table.setSortEnabled(false);
+		table.setEditable(true);
+		table.setTableFieldFactory(new DefaultFieldFactory() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Field createField(Container container, Object itemId, Object propertyId, Component uiContext) {
+				if (propertyId.equals(containerPropertyLang) || propertyId.equals(containerPropertyText)
+						|| propertyId.equals(containerPropertyNum) || propertyId.equals(containerPropertyTools))
+					container.getContainerProperty(itemId, propertyId).setReadOnly(true);
+
+				return super.createField(container, itemId, propertyId, uiContext);
+			}
+		});
+
+		table.setColumnWidth(containerPropertyNum, 50);
+		table.setColumnWidth(containerPropertyLang, 50);
+		table.setColumnWidth(containerPropertyText, 250);
 		// table.setColumnWidth("Tools", 50);
 
 		mainView.getService().getAudioSubtitles(item).forEach(e -> {

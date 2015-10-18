@@ -1,0 +1,4 @@
+/* Center the text in header. */
+.v-table-header-cell {
+    text-align: center;
+}
