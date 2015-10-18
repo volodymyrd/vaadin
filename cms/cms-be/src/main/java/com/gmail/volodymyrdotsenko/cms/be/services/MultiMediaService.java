@@ -12,8 +12,12 @@ import com.gmail.volodymyrdotsenko.cms.be.domain.local.Language;
 import com.gmail.volodymyrdotsenko.cms.be.domain.local.LanguageRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItem;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioItemRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioSubtitle;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioSubtitleRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItem;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItemRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.TextItem;
 import com.gmail.volodymyrdotsenko.cms.be.dto.MapDto;
 
@@ -27,7 +31,13 @@ public class MultiMediaService {
 	private FolderRepository folderRepo;
 
 	@Autowired
+	private MediaItemRepository mediaItemRepo;
+
+	@Autowired
 	private AudioItemRepository audioItemRepo;
+
+	@Autowired
+	private AudioSubtitleRepository audioSubtitleRepo;
 
 	@Transactional
 	public List<MapDto<Long, String>> getFolderDto(Long id, String lang) {
@@ -55,13 +65,30 @@ public class MultiMediaService {
 	}
 
 	@Transactional
+	public MediaItem save(MediaItem mediaItem, List<AudioSubtitle> audioSubtitles) {
+		mediaItem.getContent().getContent();
+		mediaItem = mediaItemRepo.save(mediaItem);
+
+		if (audioSubtitles != null && audioSubtitles.size() > 0) {
+			// audioSubtitles.forEach(e -> audioSubtitleRepo.save(e));
+			audioSubtitleRepo.save(audioSubtitles);
+		}
+
+		return mediaItem;
+	}
+
+	@Transactional
 	public AudioItem getAudioItemWithContent(Long id) {
 		AudioItem item = audioItemRepo.findOne(id);
 		item.getContent().getContent();
-		
+
 		for (Map.Entry<Language, TextItem> e : item.getTextItem().entrySet()) {
 		}
 
 		return item;
+	}
+
+	public List<AudioSubtitle> getAudioSubtitles(AudioItem item) {
+		return audioSubtitleRepo.findByItem(item);
 	}
 }

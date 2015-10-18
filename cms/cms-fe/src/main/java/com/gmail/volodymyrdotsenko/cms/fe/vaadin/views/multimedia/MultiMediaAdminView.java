@@ -3,6 +3,7 @@ package com.gmail.volodymyrdotsenko.cms.fe.vaadin.views.multimedia;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,11 @@ import org.vaadin.spring.sidebar.annotation.FontAwesomeIcon;
 import org.vaadin.spring.sidebar.annotation.SideBarItem;
 
 import com.gmail.volodymyrdotsenko.cms.be.domain.local.LanguageRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioSubtitle;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioSubtitleRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.Folder;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.FolderRepository;
-import com.gmail.volodymyrdotsenko.cms.be.domain.media.MadiaItemRepository;
+import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItemRepository;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.MediaItem;
 import com.gmail.volodymyrdotsenko.cms.be.services.MultiMediaService;
 import com.gmail.volodymyrdotsenko.cms.fe.vaadin.Sections;
@@ -75,7 +78,7 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		return folderRepo;
 	}
 
-	public MadiaItemRepository getMediaItemRepo() {
+	public MediaItemRepository getMediaItemRepo() {
 		return mediaItemRepo;
 	}
 
@@ -87,20 +90,26 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		return service;
 	}
 
+	public AudioSubtitleRepository getAudioSubtitleRepo() {
+		return audioSubtitleRepo;
+	}
+
 	private final FolderRepository folderRepo;
-	private final MadiaItemRepository mediaItemRepo;
+	private final MediaItemRepository mediaItemRepo;
 	private final LanguageRepository langRepo;
 	// private final MadiaItemContentRepository mediaItemContentRepo;
 	private final MultiMediaService service;
+	private final AudioSubtitleRepository audioSubtitleRepo;
 
 	@Autowired
 	public MultiMediaAdminView(ApplicationContext applicationContext) {
 
 		this.applicationContext = applicationContext;
 		this.folderRepo = applicationContext.getBean(FolderRepository.class);
-		this.mediaItemRepo = applicationContext.getBean(MadiaItemRepository.class);
+		this.mediaItemRepo = applicationContext.getBean(MediaItemRepository.class);
 		this.langRepo = applicationContext.getBean(LanguageRepository.class);
 		this.service = applicationContext.getBean(MultiMediaService.class);
+		this.audioSubtitleRepo = applicationContext.getBean(AudioSubtitleRepository.class);
 
 		langRepo.findAll().forEach(e -> {
 			langSet.add(e.getCode());
@@ -137,14 +146,15 @@ public class MultiMediaAdminView extends CustomComponent implements View {
 		return folderRepo.getOne(mediaLibraryTree.getSelectedFolderNodeId());
 	}
 
-	public MediaItem save(MediaItem audioItem) {
-		audioItem.getContent().getContent();
-		audioItem = mediaItemRepo.save(audioItem);
+	public MediaItem save(MediaItem mediaItem, List<AudioSubtitle> audioSubtitles) {
+
+		mediaItem = service.save(mediaItem, audioSubtitles);
+
 		mediaLibraryTree.refreshNode(mediaLibraryTree.getSelectedFolderNodeKey());
 
 		new Notification("Saved successful", Notification.Type.HUMANIZED_MESSAGE).show(Page.getCurrent());
-		
-		return audioItem;
+
+		return mediaItem;
 	}
 
 	public void MultiMediaAdminView() {
