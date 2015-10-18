@@ -273,8 +273,8 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 						AudioSubtitle as = new AudioSubtitle(l, item,
 								(Integer) i.getItemProperty(containerPropertyNum).getValue());
 
-						as.setEnd(Utils.vttToDate((String) i.getItemProperty(containerPropertyEnd).getValue()));
-						as.setStart(Utils.vttToDate((String) i.getItemProperty(containerPropertyStart).getValue()));
+						as.setEnd((String) i.getItemProperty(containerPropertyEnd).getValue());
+						as.setStart((String) i.getItemProperty(containerPropertyStart).getValue());
 						as.setText((String) i.getItemProperty(containerPropertyText).getValue());
 
 						subtitles.add(as);
@@ -397,12 +397,17 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 			@Override
 			public void buttonClick(ClickEvent event) {
+				if (timeTrack <= 0)
+					return;
+
 				Item it = table.getItem(as.getId().getOrderNum());
-				it.getItemProperty("Start").setValue(Utils.convertToVtt(timeTrack));
+
+				System.out.println(Utils.convertToVtt(timeTrack));
+				it.getItemProperty(containerPropertyStart).setValue(Utils.convertToVtt(timeTrack));
 
 				if (as.getId().getOrderNum() > 0)
 					it = table.getItem(as.getId().getOrderNum() - 1);
-				it.getItemProperty("End").setValue(Utils.convertToVtt(timeTrack));
+				it.getItemProperty(containerPropertyEnd).setValue(Utils.convertToVtt(timeTrack));
 			}
 		}
 
@@ -497,25 +502,44 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 
 			@Override
 			public Field createField(Container container, Object itemId, Object propertyId, Component uiContext) {
-				if (propertyId.equals(containerPropertyLang) || propertyId.equals(containerPropertyText)
-						|| propertyId.equals(containerPropertyNum) || propertyId.equals(containerPropertyTools))
-					container.getContainerProperty(itemId, propertyId).setReadOnly(true);
 
-				return super.createField(container, itemId, propertyId, uiContext);
+				Field f = super.createField(container, itemId, propertyId, uiContext);
+
+				if (propertyId.equals(containerPropertyNum)) {
+					container.getContainerProperty(itemId, propertyId).setReadOnly(true);
+					f.setWidth(40, Unit.PIXELS);
+				} else if (propertyId.equals(containerPropertyLang)) {
+					container.getContainerProperty(itemId, propertyId).setReadOnly(true);
+					f.setWidth(40, Unit.PIXELS);
+				} else if (propertyId.equals(containerPropertyText)) {
+					container.getContainerProperty(itemId, propertyId).setReadOnly(true);
+					f.setWidth(300, Unit.PIXELS);
+				} else if (propertyId.equals(containerPropertyTools)) {
+					container.getContainerProperty(itemId, propertyId).setReadOnly(true);
+					f.setWidth(70, Unit.PIXELS);
+				} else if (propertyId.equals(containerPropertyStart)) {
+					f.setWidth(120, Unit.PIXELS);
+				} else if (propertyId.equals(containerPropertyEnd)) {
+					f.setWidth(120, Unit.PIXELS);
+				}
+
+				return f;
 			}
 		});
 
 		table.setColumnWidth(containerPropertyNum, 50);
 		table.setColumnWidth(containerPropertyLang, 50);
-		table.setColumnWidth(containerPropertyText, 250);
+		table.setColumnWidth(containerPropertyText, 300);
+		table.setColumnWidth(containerPropertyStart, 150);
+		table.setColumnWidth(containerPropertyEnd, 150);
 		// table.setColumnWidth("Tools", 50);
 
 		mainView.getService().getAudioSubtitles(item).forEach(e -> {
 			Button b = new Button("Take");
 			b.addClickListener(new TakeTimeClickListener(e));
 
-			Object obj[] = { e.getId().getOrderNum(), e.getId().getLang().getCode(), e.getText(),
-					Utils.dateToVtt(e.getStart()), Utils.dateToVtt(e.getEnd()), b };
+			Object obj[] = { e.getId().getOrderNum(), e.getId().getLang().getCode(), e.getText(), e.getStart(),
+					e.getEnd(), b };
 
 			table.addItem(obj, e.getId().getOrderNum());
 		});

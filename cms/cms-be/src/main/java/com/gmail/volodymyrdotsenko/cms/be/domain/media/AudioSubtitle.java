@@ -1,7 +1,6 @@
 package com.gmail.volodymyrdotsenko.cms.be.domain.media;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.persistence.*;
 
@@ -26,13 +25,11 @@ public class AudioSubtitle implements Serializable {
 	@Column(name = "TEXT", length = 255)
 	private String text;
 
-	@Temporal(TemporalType.TIME)
-	@Column(name = "START")
-	private Date start;
+	@Column(name = "START", length = 15)
+	private String start;
 
-	@Temporal(TemporalType.TIME)
-	@Column(name = "END")
-	private Date end;
+	@Column(name = "END", length = 15)
+	private String end;
 
 	public AudioSubtitlePk getId() {
 		return id;
@@ -50,19 +47,19 @@ public class AudioSubtitle implements Serializable {
 		this.text = text;
 	}
 
-	public Date getStart() {
+	public String getStart() {
 		return start;
 	}
 
-	public void setStart(Date start) {
+	public void setStart(String start) {
 		this.start = start;
 	}
 
-	public Date getEnd() {
+	public String getEnd() {
 		return end;
 	}
 
-	public void setEnd(Date end) {
+	public void setEnd(String end) {
 		this.end = end;
 	}
 }

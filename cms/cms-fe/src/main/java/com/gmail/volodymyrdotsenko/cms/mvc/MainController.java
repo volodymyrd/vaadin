@@ -22,7 +22,6 @@ import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioSubtitle;
 import com.gmail.volodymyrdotsenko.cms.be.domain.media.AudioSubtitleRepository;
 import com.gmail.volodymyrdotsenko.cms.be.services.MainService;
 import com.gmail.volodymyrdotsenko.cms.be.services.MultiMediaService;
-import com.gmail.volodymyrdotsenko.cms.be.utils.Utils;
 
 @Controller
 @RequestMapping("/")
@@ -77,7 +76,7 @@ public class MainController {
 		st.forEach(e -> {
 			int n = e.getId().getOrderNum().intValue() + 1;
 			sb.append(n + "\n");
-			sb.append(Utils.dateToVtt(e.getStart()) + " --> " + Utils.dateToVtt(e.getEnd()) + "\n");
+			sb.append(e.getStart() + " --> " + e.getEnd() + "\n");
 			sb.append(e.getText() + "\n\n");
 		});
 
