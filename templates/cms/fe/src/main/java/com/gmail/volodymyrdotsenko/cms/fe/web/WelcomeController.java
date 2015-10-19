@@ -1,4 +1,4 @@
-package com.gmail.volodymyrdotsenko.cms.fe;
+package com.gmail.volodymyrdotsenko.cms.fe.web;
 
 import java.util.Date;
 import java.util.Map;

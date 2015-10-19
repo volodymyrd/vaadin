@@ -34,19 +34,26 @@ subprojects {
 
 		libs = [:]
 
-        libs.servlet_api = "javax.servlet:servlet-api:${versions.servlet_api}"
+        //libs.servlet_api = "javax.servlet:servlet-api:${versions.servlet_api}"
 
-		libs.spring_boot = ["org.springframework.boot:spring-boot-starter-web:${versions.spring_boot}",
-			    			//"org.springframework.boot:spring-boot-starter-data-jpa:${versions.spring_boot}"
+		libs.javax = ["javax.servlet:jstl:1.2"]
+		
+		libs.spring_boot_web = ["org.springframework.boot:spring-boot-starter-web:${versions.spring_boot}",
+			    			
 			    			]
 	
+		libs.spring_boot_jpa = "org.springframework.boot:spring-boot-starter-data-jpa:${versions.spring_boot}"
+		 
+		libs.database = "mysql:mysql-connector-java:5.1.37"
+		
 		libs.test = ["org.springframework.boot:spring-boot-starter-test:${versions.spring_boot}"
 	    				//libs.junit,
             			//libs.mockito,
             			//libs.spring_test,
         ]
 
-		libs.tomcat_embed = ["org.springframework.boot:spring-boot-starter-tomcat:${versions.spring_boot}", "org.apache.tomcat.embed:tomcat-embed-jasper"]
+		libs.tomcat_embed = ["org.springframework.boot:spring-boot-starter-tomcat:${versions.spring_boot}", 
+		                     "org.apache.tomcat.embed:tomcat-embed-jasper"]
 
     }
 

@@ -17,7 +17,7 @@ apply plugin: 'war'
 
 war {
     baseName = 'cms'
-    version =  '0.0.1'
+    //version =  '0.0.1'
 }
 
 configurations {
@@ -28,7 +28,9 @@ dependencies {
 
     compile project(":be")
 
-    compile libs.spring_boot
+    compile libs.javax
+    
+    compile libs.spring_boot_web
     //compile libs.spring_ws
     //compile libs.spring_security
 
