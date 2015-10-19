@@ -1,4 +1,28 @@
+	buildscript {
+     	repositories {
+			// NOTE: You should declare only repositories that you need here
+			mavenLocal()
+			mavenCentral()
+			maven { url "http://repo.spring.io/release" }
+			//maven { url "http://repo.spring.io/milestone" }
+			//maven { url "http://repo.spring.io/snapshot" }
+    	}
+    	dependencies {
+			classpath("org.springframework.boot:spring-boot-gradle-plugin:${versions.spring_boot}")
+    	}
+	}
+
+apply plugin: 'spring-boot'
 apply plugin: 'war'
+
+war {
+    baseName = 'cms'
+    version =  '0.0.1'
+}
+
+configurations {
+    providedRuntime
+}
 
 dependencies {
 

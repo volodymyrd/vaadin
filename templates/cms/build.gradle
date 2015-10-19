@@ -1,46 +1,4 @@
-buildscript {
-    ext {
-	springBootVersion = '1.3.0.BUILD-SNAPSHOT'
-    }
-    repositories {
-	// NOTE: You should declare only repositories that you need here
-	mavenLocal()
-	mavenCentral()
-	maven { url "http://repo.spring.io/release" }
-	maven { url "http://repo.spring.io/milestone" }
-	maven { url "http://repo.spring.io/snapshot" }
-    }
-    dependencies {
-	classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
-}
-
 subprojects {
-
-    // Configuring java
-    apply plugin: 'java'
-    apply plugin: 'maven'
-    apply plugin: 'eclipse'
-    apply plugin: 'spring-boot'
-
-    sourceCompatibility = targetCompatibility = 1.8
-
-    compileJava {
-        options.encoding = "UTF-8"
-    }
-    compileTestJava {
-        options.encoding = "UTF-8"
-    }
-
-    repositories {
-	mavenLocal()
-	mavenCentral()
-	maven { url "http://repo.spring.io/release" }
-	maven { url "http://repo.spring.io/milestone" }
-	maven { url "http://repo.spring.io/snapshot" }
-    }
-
-    //buildDir = 'target'
 
     ext {
         versions = [
@@ -74,21 +32,45 @@ subprojects {
             //httpclient: '4.3.6',
         ]
 
-	libs = [:]
+		libs = [:]
 
         libs.servlet_api = "javax.servlet:servlet-api:${versions.servlet_api}"
 
-        //libs.spring_boot = ["org.springframework.boot:spring-boot-starter-web:${versions.spring_boot}"]
-	libs.spring_boot = ["org.springframework.boot:spring-boot-starter", "org.springframework.boot:spring-boot-starter-data-jpa"]
+		libs.spring_boot = ["org.springframework.boot:spring-boot-starter-web:${versions.spring_boot}",
+			    			//"org.springframework.boot:spring-boot-starter-data-jpa:${versions.spring_boot}"
+			    			]
 	
-	libs.test = [
-	    "org.springframework.boot:spring-boot-starter-test"
-	    //libs.junit,
-            //libs.mockito,
-            //libs.spring_test,
+		libs.test = ["org.springframework.boot:spring-boot-starter-test:${versions.spring_boot}"
+	    				//libs.junit,
+            			//libs.mockito,
+            			//libs.spring_test,
         ]
 
-	libs.tomcat_embed = ["org.springframework.boot:spring-boot-starter-tomcat", "org.apache.tomcat.embed:tomcat-embed-jasper"]
+		libs.tomcat_embed = ["org.springframework.boot:spring-boot-starter-tomcat:${versions.spring_boot}", "org.apache.tomcat.embed:tomcat-embed-jasper"]
 
     }
+
+    // Configuring java
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'eclipse'
+
+    sourceCompatibility = targetCompatibility = 1.8
+
+    compileJava {
+        options.encoding = "UTF-8"
+    }
+    compileTestJava {
+        options.encoding = "UTF-8"
+    }
+
+    repositories {
+		mavenLocal()
+		mavenCentral()
+		maven { url "http://repo.spring.io/release" }
+		//maven { url "http://repo.spring.io/milestone" }
+		//maven { url "http://repo.spring.io/snapshot" }
+    }
+
+    buildDir = 'target'
 }
