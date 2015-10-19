@@ -1,0 +1,14 @@
+apply plugin: 'war'
+
+dependencies {
+
+    compile project(":be")
+
+    compile libs.spring_boot
+    //compile libs.spring_ws
+    //compile libs.spring_security
+
+    testCompile libs.test
+
+    providedRuntime libs.tomcat_embed
+}

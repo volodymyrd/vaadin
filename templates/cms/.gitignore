@@ -1,0 +1,9 @@
+*/.settings/*
+*/.classpath
+*/.project
+*/target/*
+*/hs_err*.log
+.gradle
+*/build/*
+*/bin/*
+

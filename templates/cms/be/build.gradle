@@ -1,0 +1,6 @@
+dependencies {
+
+    //compile libs.spring
+    //compile libs.spring_ws
+    //compile libs.spring_security
+}
