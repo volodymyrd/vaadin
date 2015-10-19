@@ -6,4 +6,5 @@
 .gradle
 */build/*
 */bin/*
+*/.gitignore
 
