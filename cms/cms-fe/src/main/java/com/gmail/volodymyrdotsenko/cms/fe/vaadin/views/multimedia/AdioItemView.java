@@ -484,7 +484,7 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		h.addComponent(v1);
 		table.setSizeFull();
 		table.setSelectable(true);
-		table.setHeight(300, Unit.PIXELS);
+		table.setHeight(800, Unit.PIXELS);
 		table.addContainerProperty(containerPropertyNum, Integer.class, null);
 		table.addContainerProperty(containerPropertyLang, String.class, null);
 		table.addContainerProperty(containerPropertyText, String.class, null);
@@ -534,15 +534,17 @@ public class AdioItemView extends VerticalLayout implements EmbeddedView, Succes
 		table.setColumnWidth(containerPropertyEnd, 150);
 		// table.setColumnWidth("Tools", 50);
 
-		mainView.getService().getAudioSubtitles(item).forEach(e -> {
-			Button b = new Button("Take");
-			b.addClickListener(new TakeTimeClickListener(e));
+		List<AudioSubtitle> stl = mainView.getService().getAudioSubtitles(item);
+		if (stl != null && stl.size() > 0)
+			mainView.getService().getAudioSubtitles(item).forEach(e -> {
+				Button b = new Button("Take");
+				b.addClickListener(new TakeTimeClickListener(e));
 
-			Object obj[] = { e.getId().getOrderNum(), e.getId().getLang().getCode(), e.getText(), e.getStart(),
-					e.getEnd(), b };
+				Object obj[] = { e.getId().getOrderNum(), e.getId().getLang().getCode(), e.getText(), e.getStart(),
+						e.getEnd(), b };
 
-			table.addItem(obj, e.getId().getOrderNum());
-		});
+				table.addItem(obj, e.getId().getOrderNum());
+			});
 
 		v1.addComponent(table);
 

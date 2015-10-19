@@ -89,6 +89,9 @@ public class MultiMediaService {
 	}
 
 	public List<AudioSubtitle> getAudioSubtitles(AudioItem item) {
+		if (item.getId() == null)
+			return null;
+
 		return audioSubtitleRepo.findByItem(item);
 	}
 }
