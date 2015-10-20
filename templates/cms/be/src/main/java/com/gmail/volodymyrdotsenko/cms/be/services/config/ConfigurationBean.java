@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,7 @@ public class ConfigurationBean implements ApplicationListener<ContextRefreshedEv
 				role.setName("ROLE_ADMIN");
 				User admin = new User();
 				admin.setEmail("admin@admin.com");
-				admin.setPassword(new ShaPasswordEncoder(256).encodePassword("admin", null));
+				admin.setPassword(new BCryptPasswordEncoder().encode("admin"));
 				admin.setUserName("admin");
 				Calendar c = Calendar.getInstance();
 				c.set(9999, 11, 31, 0, 0, 0);

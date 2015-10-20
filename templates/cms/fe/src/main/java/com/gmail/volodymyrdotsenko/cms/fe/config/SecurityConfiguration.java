@@ -1,5 +1,7 @@
 package com.gmail.volodymyrdotsenko.cms.fe.config;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 /**
@@ -32,26 +37,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(userDetailsService).passwordEncoder(new ShaPasswordEncoder(256));
+		auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable(); // Use Vaadin's built-in CSRF protection instead
-		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/login/**").permitAll()
-				.antMatchers("/vaadinServlet/UIDL/**").permitAll().antMatchers("/vaadinServlet/HEARTBEAT/**")
-				.permitAll().antMatchers("/cms/**").authenticated().antMatchers("/admin/**").authenticated();
-
-		http.httpBasic().disable();
-		http.formLogin().disable();
-		http.logout().logoutUrl("/logout").logoutSuccessUrl("/").permitAll();
-		http.exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
-		http.rememberMe().rememberMeServices(rememberMeServices()).key("myAppKey");
-	}
-
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/VAADIN/**");
+		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/bootstrap/**").authenticated()
+				.antMatchers("/admin/**").authenticated().and().formLogin().loginPage("/login").permitAll()
+				.failureUrl("/login?error").usernameParameter("username").passwordParameter("password").and().logout()
+				.logoutSuccessUrl("/").and().csrf().and().rememberMe().tokenRepository(persistentTokenRepository())
+				.tokenValiditySeconds(3600);
 	}
 
 	@Override
@@ -60,10 +55,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return super.authenticationManagerBean();
 	}
 
+	@Autowired
+	DataSource dataSource;
+
 	@Bean
-	public RememberMeServices rememberMeServices() {
-		TokenBasedRememberMeServices services = new TokenBasedRememberMeServices("myAppKey", userDetailsService());
-		services.setAlwaysRemember(true);
-		return services;
+	public PersistentTokenRepository persistentTokenRepository() {
+		JdbcTokenRepositoryImpl db = new JdbcTokenRepositoryImpl();
+		db.setDataSource(dataSource);
+		return db;
 	}
 }
