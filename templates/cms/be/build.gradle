@@ -2,8 +2,7 @@
 dependencies {
 
     compile libs.spring_boot_jpa
-    //compile libs.spring_ws
-    //compile libs.spring_security
+    compile libs.spring_boot_security
     
     compile libs.database
 }

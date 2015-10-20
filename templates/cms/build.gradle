@@ -2,7 +2,8 @@ subprojects {
 
     ext {
         versions = [
-	    spring_boot: '1.2.7.RELEASE'
+	    	spring_boot: '1.2.7.RELEASE',
+	    	hibernate: '4.3.2.Final'
             //servlet_api: '2.5',
             //slf4j: '1.7.5',
             //logback: '1.0.13',
@@ -42,8 +43,11 @@ subprojects {
 			    			
 			    			]
 	
-		libs.spring_boot_jpa = "org.springframework.boot:spring-boot-starter-data-jpa:${versions.spring_boot}"
-		 
+		libs.spring_boot_jpa = ["org.springframework.boot:spring-boot-starter-data-jpa:${versions.spring_boot}",
+								"org.hibernate:hibernate-validator:${versions.hibernate}"]
+		
+		libs.spring_boot_security = "org.springframework.boot:spring-boot-starter-security:${versions.spring_boot}"
+		
 		libs.database = "mysql:mysql-connector-java:5.1.37"
 		
 		libs.test = ["org.springframework.boot:spring-boot-starter-test:${versions.spring_boot}"
