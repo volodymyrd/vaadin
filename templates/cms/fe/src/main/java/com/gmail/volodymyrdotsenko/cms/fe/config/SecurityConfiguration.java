@@ -45,8 +45,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/bootstrap/**").authenticated()
 				.antMatchers("/admin/**").authenticated().and().formLogin().loginPage("/login").permitAll()
 				.failureUrl("/login?error").usernameParameter("username").passwordParameter("password").and().logout()
-				.logoutSuccessUrl("/").and().csrf().and().rememberMe().tokenRepository(persistentTokenRepository())
+				.logoutSuccessUrl("/").and().rememberMe().tokenRepository(persistentTokenRepository())
 				.tokenValiditySeconds(3600);
+
+		http.csrf().disable();
 	}
 
 	@Override

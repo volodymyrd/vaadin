@@ -3,10 +3,11 @@ subprojects {
     ext {
         versions = [
 	    	spring_boot: '1.2.7.RELEASE',
-	    	hibernate: '4.3.2.Final'
-	    vaadin: '7.5.5',
-	    vaadin-spring: '1.0.0',
-	    vaadin-spring-ext: '0.0.7-SNAPSHOT',
+	    	hibernate: '4.3.2.Final',
+	    	vaadin: '7.5.5',
+	    	vaadin_spring: '1.0.0',
+	    	vaadin_spring_ext: '0.0.7-SNAPSHOT',
+	    	vaadin_viritin: '1.34',
             //servlet_api: '2.5',
             //slf4j: '1.7.5',
             //logback: '1.0.13',
@@ -53,8 +54,23 @@ subprojects {
 		
 		libs.database = "mysql:mysql-connector-java:5.1.37"
 
-		libs.vaadin = [""]
-		libs.vaadin_spring = [""]
+		libs.vaadin = ["com.vaadin:vaadin-themes:${versions.vaadin}",
+					   "com.vaadin:vaadin-server:${versions.vaadin}",
+					   "com.vaadin:vaadin-client:${versions.vaadin}",
+					  // "com.vaadin:vaadin-client-compiler:${versions.vaadin}",
+					   "com.vaadin:vaadin-client-compiled:${versions.vaadin}",
+					   "com.vaadin:vaadin-push:${versions.vaadin}",]
+		
+		libs.vaadin_addon = ["org.vaadin:viritin:${versions.vaadin_viritin}"]
+		
+		libs.vaadin_spring = ["com.vaadin:vaadin-spring:${versions.vaadin_spring}",
+		                      "com.vaadin:vaadin-spring-boot:${versions.vaadin_spring}",
+		                      "org.vaadin.spring.extensions:vaadin-spring-ext-core:${versions.vaadin_spring_ext}",
+		                      "org.vaadin.spring.extensions:vaadin-spring-ext-boot:${versions.vaadin_spring_ext}",
+		                      "org.vaadin.spring.extensions:vaadin-spring-ext-security:${versions.vaadin_spring_ext}",
+		                      "org.vaadin.spring.addons:vaadin-spring-addon-eventbus:${versions.vaadin_spring_ext}",
+		                      "org.vaadin.spring.addons:vaadin-spring-addon-mvp:${versions.vaadin_spring_ext}",
+		                      "org.vaadin.spring.addons:vaadin-spring-addon-mvp:${versions.vaadin_spring_sidebar}"]
 		
 		libs.test = ["org.springframework.boot:spring-boot-starter-test:${versions.spring_boot}"
 	    				//libs.junit,
@@ -63,7 +79,9 @@ subprojects {
         ]
 
 		libs.tomcat_embed = ["org.springframework.boot:spring-boot-starter-tomcat:${versions.spring_boot}", 
-		                     "org.apache.tomcat.embed:tomcat-embed-jasper"]
+		                     //"org.apache.tomcat.embed:tomcat-embed-jasper",
+		                     //"javax.servlet:jstl:1.2"
+		                     ]
 
     }
 
@@ -85,6 +103,8 @@ subprojects {
 		mavenLocal()
 		mavenCentral()
 		maven { url "http://repo.spring.io/release" }
+		maven {url "http://maven.vaadin.com/vaadin-addons"}
+		maven {url "https://oss.sonatype.org/content/repositories/snapshots"}
 		//maven { url "http://repo.spring.io/milestone" }
 		//maven { url "http://repo.spring.io/snapshot" }
     }

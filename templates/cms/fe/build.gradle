@@ -21,19 +21,35 @@ war {
 }
 
 configurations {
-    providedRuntime
+		providedRuntime
+		
+    	/*compile.exclude module: "jetty-servlet", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-xml", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-plus", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-util", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-servlets", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-security", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-client", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-webapp", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-io", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-server", group: "org.eclipse.jetty"
+   		compile.exclude module: "jetty-continuation", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-annotations", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-jndi", group: "org.eclipse.jetty"
+    	compile.exclude module: "jetty-http", group: "org.eclipse.jetty"*/
 }
 
 dependencies {
 
     compile project(":be")
-
-    compile libs.javax
-    
+   
+   	compile libs.javax
     compile libs.spring_boot_web
-    //compile libs.spring_ws
-    //compile libs.spring_security
-
+   
+   	compile libs.vaadin
+   	compile libs.vaadin_addon
+   	compile libs.vaadin_spring
+	
     testCompile libs.test
 
     providedRuntime libs.tomcat_embed
