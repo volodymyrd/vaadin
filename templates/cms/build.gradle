@@ -4,6 +4,9 @@ subprojects {
         versions = [
 	    	spring_boot: '1.2.7.RELEASE',
 	    	hibernate: '4.3.2.Final'
+	    vaadin: '7.5.5',
+	    vaadin-spring: '1.0.0',
+	    vaadin-spring-ext: '0.0.7-SNAPSHOT',
             //servlet_api: '2.5',
             //slf4j: '1.7.5',
             //logback: '1.0.13',
@@ -49,6 +52,9 @@ subprojects {
 		libs.spring_boot_security = "org.springframework.boot:spring-boot-starter-security:${versions.spring_boot}"
 		
 		libs.database = "mysql:mysql-connector-java:5.1.37"
+
+		libs.vaadin = [""]
+		libs.vaadin_spring = [""]
 		
 		libs.test = ["org.springframework.boot:spring-boot-starter-test:${versions.spring_boot}"
 	    				//libs.junit,
