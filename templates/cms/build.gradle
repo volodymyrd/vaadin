@@ -79,8 +79,8 @@ subprojects {
         ]
 
 		libs.tomcat_embed = ["org.springframework.boot:spring-boot-starter-tomcat:${versions.spring_boot}", 
-		                     //"org.apache.tomcat.embed:tomcat-embed-jasper",
-		                     //"javax.servlet:jstl:1.2"
+		                     //conflict with vaadin
+		                     "org.apache.tomcat.embed:tomcat-embed-jasper",
 		                     ]
 
     }
@@ -103,8 +103,8 @@ subprojects {
 		mavenLocal()
 		mavenCentral()
 		maven { url "http://repo.spring.io/release" }
-		maven {url "http://maven.vaadin.com/vaadin-addons"}
-		maven {url "https://oss.sonatype.org/content/repositories/snapshots"}
+		//maven {url "http://maven.vaadin.com/vaadin-addons"}
+		//maven {url "https://oss.sonatype.org/content/repositories/snapshots"}
 		//maven { url "http://repo.spring.io/milestone" }
 		//maven { url "http://repo.spring.io/snapshot" }
     }

@@ -48,7 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.logoutSuccessUrl("/").and().rememberMe().tokenRepository(persistentTokenRepository())
 				.tokenValiditySeconds(3600);
 
-		http.csrf().disable();
+		//http.csrf().disable();
 	}
 
 	@Override

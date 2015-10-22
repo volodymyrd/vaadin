@@ -46,9 +46,9 @@ dependencies {
    	compile libs.javax
     compile libs.spring_boot_web
    
-   	compile libs.vaadin
-   	compile libs.vaadin_addon
-   	compile libs.vaadin_spring
+   	//compile libs.vaadin
+   	//compile libs.vaadin_addon
+   	//compile libs.vaadin_spring
 	
     testCompile libs.test
 
