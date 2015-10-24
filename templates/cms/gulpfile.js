@@ -25,3 +25,5 @@ gulp.task('watch', function() {
   gulp.watch('fe/src/main/webapp/wc/cms/js/**/*', ['js']);
   gulp.watch(['fe/src/main/webapp/wc/cms/css/sass/**/*'], ['sass']);
 });
+
+gulp.task('default', ['sass', 'watch']);
